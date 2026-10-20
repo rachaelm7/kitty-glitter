@@ -28,11 +28,28 @@ export function InboxScreen({ initialView = "priority" }: { initialView?: InboxV
 
   const list = useMemo(() => filterMessages(all, { account, view, query }), [all, account, view, query]);
   const open = all.find((m) => m.id === openId) ?? null;
+  const totalUnread = accounts.reduce((n, a) => n + a.unread, 0);
   const priorityCount = filterMessages(all, { account, view: "priority", query: "" }).length;
 
   return (
     <div>
       <PageHeader title="Inbox" subtitle="All five accounts in one calm place" />
+
+      {totalUnread > 100 && (
+        <Link
+          href="/inbox/rescue"
+          className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-colors hover:bg-surface-2"
+        >
+          <span className="grid size-10 flex-none place-items-center rounded-xl bg-accent-soft text-accent">
+            <Icon.Lifebuoy />
+          </span>
+          <span className="min-w-0 flex-1">
+            <b className="block font-semibold">{totalUnread} unread? Try Rescue Mode</b>
+            <span className="block text-sm text-muted">Sort the pile in calm steps. Important mail is protected.</span>
+          </span>
+          <Icon.Chevron className="flex-none text-muted" width={20} height={20} />
+        </Link>
+      )}
 
       <div className="relative mt-5">
         <Icon.Search className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted" width={20} height={20} />

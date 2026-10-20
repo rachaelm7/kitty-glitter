@@ -6,3 +6,4 @@ export { AccountDot } from "./components/AccountDot";
 export { InboxScreen } from "./components/InboxScreen";
 export { CleanupScreen } from "./components/CleanupScreen";
 export { CleanupReview } from "./components/CleanupReview";
+export { RescueScreen } from "./components/RescueScreen";

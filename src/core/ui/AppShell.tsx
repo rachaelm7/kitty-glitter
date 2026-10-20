@@ -44,7 +44,7 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
         <ul className="space-y-1">
           {TABS.map((t) => (
             <li key={t.href}>
-              <NavLink href={t.href} active={isActive(pathname, t.href) && !(t.href === "/more" && onModulePage)} icon={<t.icon />}>
+              <NavLink href={t.href} active={isActive(pathname, t.href) && !onModulePage} icon={<t.icon />}>
                 {t.label}
               </NavLink>
             </li>

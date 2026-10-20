@@ -16,9 +16,28 @@ PRs are stacked because each builds on the last. Merge them in order; GitHub ret
 | 1 | `claude/life-hub-phase-1-27ixfq` | `main` | Docs, prototype, Claude GitHub Actions | PR #1 open |
 | 2 | `claude/app-foundation` | #1 | Next.js PWA: Today, Inbox, Cleanup, Tasks, More | PR #2 open |
 | 3 | `claude/brain-dump` | #2 | Brain Dump, Life Threads | PR #3 open |
-| 4 | `claude/appointment-concierge` | #3 | Appointment Concierge | PR open |
+| 4 | `claude/appointment-concierge` | #3 | Appointment Concierge | PR #4 open |
+| 5 | `claude/email-rescue` | #4 | Email Rescue Mode | PR open |
 
 ## Increments
+
+### Priority 3: Email Rescue Mode
+**Branch:** `claude/email-rescue`
+
+Built
+- **Rescue Mode** (`/inbox/rescue`, plus a prompt at the top of Inbox when there are 100+ unread): a four-step flow (Overview → Sort piles → Review → Done) through a generated, fictional pile of **510 unread** emails. That matches the unread counts on Today, and the pile includes newsletters, promotions, receipts, notifications, social updates, personal mail, bills, appointments and security alerts.
+- **Important-email protection is the core rule.** Bills, appointments, security alerts, mail from people you know, and anything with a deadline (such as receipts with an open return window) are pulled out first and **never included in any bulk action**. They're shown with the reason each one is protected.
+- **Piles** (Promotions, Newsletters, Notifications, Social, Receipts) each have a safe default (archive promotions, mark the rest read) that you can change to Mark read, Archive or Leave. **Preview** lists the senders and recent messages, and says how many similar emails were kept out because they look important.
+- **Review** shows the plan, the protected count marked "Untouched", and a before/after unread meter. **Confirm is simulated** and says that no real emails changed. Start over resets the plan.
+
+Tests
+- Unit: 5 tests (the generator is deterministic and matches the account totals, all requested kinds are present, **protected mail never appears in a pile**, the protection rules cover every important kind, and the plan totals add up with protected mail left untouched).
+- End-to-end: the full flow, including the protected sheet, a pile action change, preview and simulated confirm, at both sizes.
+
+Known gaps
+- The piles act per pile, not per sender. Per-sender choices live in the existing Cleanup flow.
+- Protection rules are simple keyword and category rules on fictional data. Real mail would need careful tuning and a way to mark a sender as always important.
+
 
 ### Priority 2: Appointment Concierge
 **Branch:** `claude/appointment-concierge`
@@ -93,6 +112,6 @@ Known gaps
 |---|---|---|
 | 1 | Brain Dump / Quick Capture | Built, in review (PR from `claude/brain-dump`) |
 | 2 | Appointment Concierge | Built, in review (PR from `claude/appointment-concierge`) |
-| 3 | Email Rescue Mode | Not started |
+| 3 | Email Rescue Mode | Built, in review (PR from `claude/email-rescue`) |
 | 4 | Travel & Home with Life Threads | Not started |
 | 5 | UI/UX polish (widgets, states, motion) | Not started |

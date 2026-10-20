@@ -18,7 +18,7 @@ export const MODULES: ModuleEntry[] = [
   { key: "capture", name: "Brain Dump", href: "/capture", status: "live", blurb: "Type or talk, review before anything is added", icon: "Mic" },
   { key: "threads", name: "Life Threads", href: "/threads", status: "live", blurb: "Related tasks, mail and dates together", icon: "Thread" },
   { key: "appointments", name: "Appointments", href: "/appointments", status: "live", blurb: "Concierge for referrals, scheduling and follow-ups", icon: "Stethoscope" },
-  { key: "rescue", name: "Email Rescue Mode", status: "planned", blurb: "Calm path through a huge unread pile", icon: "Lifebuoy" },
+  { key: "rescue", name: "Email Rescue", href: "/inbox/rescue", status: "live", blurb: "Calm path through a huge unread pile", icon: "Lifebuoy" },
   { key: "travel", name: "Travel", status: "planned", blurb: "Trips, packing and reservations", icon: "Plane" },
   { key: "home", name: "Home", status: "planned", blurb: "Maintenance, warranties and insurance", icon: "House" },
   { key: "calendar", name: "Calendar", status: "planned", blurb: "Full calendar sync", icon: "Calendar" },
