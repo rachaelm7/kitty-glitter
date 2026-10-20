@@ -45,7 +45,7 @@ export function TravelScreen() {
         <p className="mt-1">
           {formatDay(start)} – {formatDay(end)} · {trip.nights} nights
         </p>
-        <p className="mt-3 inline-flex rounded-full bg-accent-ink/15 px-3 py-1 text-sm font-semibold">Leaves {untilLabel(trip.startOffset)}</p>
+        <p className="mt-3 inline-flex rounded-full bg-ink/15 px-3 py-1 text-sm font-semibold">Leaves {untilLabel(trip.startOffset)}</p>
         {trip.threadId && (
           <div className="mt-3">
             <ThreadTag id={trip.threadId} />

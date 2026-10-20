@@ -20,4 +20,4 @@ Status: `idea` · `ready` · `in progress` · `done`
 | 11 | Appointment Concierge | 1b | in review | Not medical advice |
 | 12 | Email Rescue Mode | 1b | in review | Important-email protection |
 | 13 | Travel & Home dashboards + Life Threads | 1b | in review | |
-| 14 | UI/UX polish: widgets, states, motion | 1b | ready | Reduced motion, contrast |
+| 14 | UI/UX polish: widgets, states, motion | 1b | in review | Reduced motion, contrast |

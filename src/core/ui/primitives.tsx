@@ -202,7 +202,7 @@ export function ErrorState({ title, children, onRetry }: { title: string; childr
 
 export function SkeletonRows({ rows = 3 }: { rows?: number }) {
   return (
-    <div aria-busy="true" aria-label="Loading" className="space-y-3">
+    <div role="status" aria-busy="true" aria-label="Loading" className="space-y-3">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="space-y-2 rounded-2xl border border-line bg-surface p-4">
           <div className="skeleton h-3.5 w-1/3" />

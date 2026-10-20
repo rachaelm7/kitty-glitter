@@ -3,6 +3,16 @@
 Living log of what Claude Code has built, how it was checked, and what is still open.
 Newest increment first. Updated in every PR.
 
+## Where things stand (end of the secondary queue)
+All five secondary-queue priorities are built on stacked branches with open PRs (#2–#7, on top of #1). **Nothing is merged or deployed.**
+
+Needs Rachael's authorization or action:
+1. Review and merge the PRs **in order** (#1 → #2 → … → #7). Merging #1 first also activates the Claude GitHub Actions workflows.
+2. To see it on your phone: connect the repo to Vercel. Previews will then appear on each PR. Claude can't do this from here.
+3. For the `claude-ready` automation: add the `CLAUDE_CODE_OAUTH_TOKEN` secret and create the `claude-ready` label (see `docs/AUTOMATION.md`).
+
+Not done yet: manual testing on a real iPhone (install to Home Screen, offline, VoiceOver), and the later phases (Supabase login, read-only Gmail, real AI), which are out of scope for this demo.
+
 ## Review status: read this first
 - **External review:** none yet. No autonomous ChatGPT reviewer is connected to this repository, so **no change here has been approved by ChatGPT**. Anything listed as "reviewed" below means Claude's own self-review unless it names a person.
 - **Self-review:** Claude runs lint, typecheck, unit tests (Vitest), end-to-end tests (Playwright, at iPhone 13 and 1280px desktop sizes), a production build, and looks at screenshots in light and dark mode before opening a PR.
@@ -18,9 +28,29 @@ PRs are stacked because each builds on the last. Merge them in order; GitHub ret
 | 3 | `claude/brain-dump` | #2 | Brain Dump, Life Threads | PR #3 open |
 | 4 | `claude/appointment-concierge` | #3 | Appointment Concierge | PR #4 open |
 | 5 | `claude/email-rescue` | #4 | Email Rescue Mode | PR #5 open |
-| 6 | `claude/travel-home` | #5 | Travel & Home dashboards | PR open |
+| 6 | `claude/travel-home` | #5 | Travel & Home dashboards | PR #6 open |
+| 7 | `claude/ui-polish` | #6 | Widgets, states, motion, accessibility | PR open |
 
 ## Increments
+
+### Priority 5: UI/UX polish
+**Branch:** `claude/ui-polish`
+
+Built
+- **Customizable Today:** Today is now made of 10 widgets: brief, Needs you, appointments, agenda, coming up, unread, promotions, next trip, home upkeep, and quick capture. **Customize** lets you show, hide and reorder them (switches plus up/down buttons, so it works with keyboard and VoiceOver, not just dragging). The layout is saved on the device and copes with widgets added later.
+- **Containment:** every widget sits inside an error boundary, so one failing widget shows a calm "couldn't load" card with **Try again** and the rest of Today keeps working.
+- **States:** app-wide error page, friendly not-found page, route loading skeleton, a **simulated "Check for new mail"** on Inbox with a skeleton (nothing is fetched), and a **State gallery** (More → For design review) showing every empty, loading and error state, including a live contained widget failure.
+- **Motion and delight:** staggered card entrance, check "pop", sheet slide-up, and an **"All clear. Nicely done."** moment when every Needs you item is done. All of it is off under reduced motion, and a test checks that.
+- **Accessibility:** automated **axe WCAG 2.1 A/AA** checks on all 12 screens, in light and dark, at iPhone and desktop sizes. The checks found real contrast failures, which are fixed: the light-mode teal accent was darkened slightly (`#2b7a74` → `#24706a`), and two small text spots on the teal cards were adjusted. The loading skeleton also got a proper status role.
+
+Tests
+- Unit: 4 layout tests (default hidden, move with edge stops, toggle, and tolerance of old saved layouts).
+- End-to-end: customize, persist and reorder; the all-clear moment; the inbox loading state; a contained widget failure; not-found; plus **48 accessibility runs** and 2 reduced-motion runs.
+
+Known gaps
+- Reordering uses buttons; there's no drag-and-drop yet (buttons are the accessible baseline).
+- Accessibility checks are automated only. A manual VoiceOver pass on a real iPhone is still needed.
+
 
 ### Priority 4: Travel & Home, connected by Life Threads
 **Branch:** `claude/travel-home`
@@ -133,4 +163,4 @@ Known gaps
 | 2 | Appointment Concierge | Built, in review (PR from `claude/appointment-concierge`) |
 | 3 | Email Rescue Mode | Built, in review (PR from `claude/email-rescue`) |
 | 4 | Travel & Home with Life Threads | Built, in review (PR from `claude/travel-home`) |
-| 5 | UI/UX polish (widgets, states, motion) | Not started |
+| 5 | UI/UX polish (widgets, states, motion) | Built, in review (PR from `claude/ui-polish`) |

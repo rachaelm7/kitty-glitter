@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
-import { Button, Chip, EmptyState, PageHeader, Segmented } from "@/core/ui/primitives";
+import { Button, Chip, EmptyState, PageHeader, Segmented, SkeletonRows } from "@/core/ui/primitives";
+import { useToast } from "@/core/ui/Toast";
 import { Icon } from "@/core/ui/icons";
 import { mockEmailProvider } from "../data/mock";
 import { filterMessages, toProposals, type InboxView } from "../data/logic";
@@ -23,6 +24,8 @@ export function InboxScreen({ initialView = "priority" }: { initialView?: InboxV
   const [view, setView] = useState<InboxView>(initialView);
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const toast = useToast();
   const choices = useStore(cleanupStore);
   const selected = toProposals(choices).length;
 
@@ -33,7 +36,23 @@ export function InboxScreen({ initialView = "priority" }: { initialView?: InboxV
 
   return (
     <div>
-      <PageHeader title="Inbox" subtitle="All five accounts in one calm place" />
+      <PageHeader title="Inbox" subtitle="All five accounts in one calm place">
+        <Button
+          size="sm"
+          variant="quiet"
+          className="mt-2 -ml-3"
+          disabled={refreshing}
+          onClick={() => {
+            setRefreshing(true);
+            setTimeout(() => {
+              setRefreshing(false);
+              toast("You're up to date (demo: nothing is fetched)");
+            }, 900);
+          }}
+        >
+          {refreshing ? "Checking…" : "Check for new mail"}
+        </Button>
+      </PageHeader>
 
       {totalUnread > 100 && (
         <Link
@@ -91,7 +110,11 @@ export function InboxScreen({ initialView = "priority" }: { initialView?: InboxV
         />
       </div>
 
-      {view === "cleanup" ? (
+      {refreshing && view !== "cleanup" ? (
+        <div className="mt-3">
+          <SkeletonRows rows={4} />
+        </div>
+      ) : view === "cleanup" ? (
         <>
           <CleanupChooser />
           {selected > 0 && (

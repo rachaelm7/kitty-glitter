@@ -93,6 +93,19 @@ export function MoreScreen() {
         </Card>
       </Section>
 
+      <Section title="For design review" id="design">
+        <Link href="/more/states" className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-colors hover:bg-surface-2">
+          <span className="grid size-10 flex-none place-items-center rounded-xl bg-accent-soft text-accent">
+            <Icon.Grid />
+          </span>
+          <span className="flex-1">
+            <b className="block font-semibold">State gallery</b>
+            <span className="text-sm text-muted">Empty, loading and error states in one place</span>
+          </span>
+          <Icon.Chevron className="text-muted" width={20} height={20} />
+        </Link>
+      </Section>
+
       <Section title="Demo data" id="demo">
         <Card>
           <p className="text-sm">
