@@ -7,6 +7,8 @@ import { Card, EmptyState, PageHeader, Tag } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { STATUS_LABEL, appointmentStore } from "@/modules/appointments";
 import { RENEWALS } from "@/modules/bills";
+import { coverage, maintenanceStore, nextDue } from "@/modules/home";
+import { packingProgress, tripStore } from "@/modules/travel";
 import { emailProvider } from "@/modules/email";
 import { sortTasks, taskStore } from "@/modules/tasks";
 import { threadNoteStore, threadStore } from "@/modules/threads";
@@ -19,6 +21,8 @@ export function ThreadsScreen() {
   const notes = useStore(threadNoteStore);
   const messages = emailProvider.listMessages();
   const appts = useStore(appointmentStore);
+  const trips = useStore(tripStore);
+  const upkeep = useStore(maintenanceStore);
 
   return (
     <div>
@@ -37,7 +41,10 @@ export function ThreadsScreen() {
             const tDates = RENEWALS.filter((r) => r.threadId === t.id);
             const tNotes = notes.filter((n) => n.threadId === t.id);
             const tAppts = appts.filter((a) => a.threadId === t.id);
-            const empty = !tTasks.length && !tMail.length && !tDates.length && !tNotes.length && !tAppts.length;
+            const tTrips = trips.filter((x) => x.threadId === t.id);
+            const tUpkeep = upkeep.filter((m) => m.threadId === t.id);
+            const tCover = coverage.filter((c) => c.threadId === t.id);
+            const empty = !tTasks.length && !tMail.length && !tDates.length && !tNotes.length && !tAppts.length && !tTrips.length && !tUpkeep.length && !tCover.length;
             return (
               <li key={t.id} id={t.id} className="scroll-mt-6 target:[&>div]:ring-2 target:[&>div]:ring-accent">
                 <Card className="h-full">
@@ -56,6 +63,41 @@ export function ThreadsScreen() {
                       {tTasks.map((k) => (
                         <li key={k.id} className={k.done ? "text-muted line-through" : ""}>
                           {k.title} {k.kind === "reminder" && <Tag tone="neutral">Reminder</Tag>}
+                        </li>
+                      ))}
+                    </Group>
+                  )}
+                  {tTrips.length > 0 && (
+                    <Group label="Trips">
+                      {tTrips.map((x) => (
+                        <li key={x.id}>
+                          <Link href="/travel" className="hover:underline">
+                            {x.name}
+                          </Link>{" "}
+                          <Tag tone="neutral">leaves {untilLabel(x.startOffset)}</Tag>{" "}
+                          <span className="text-muted">· {x.reservations.length} bookings · {packingProgress(x.packing).pct}% packed</span>
+                        </li>
+                      ))}
+                    </Group>
+                  )}
+                  {(tUpkeep.length > 0 || tCover.length > 0) && (
+                    <Group label="Home & coverage">
+                      {tUpkeep.map((m) => (
+                        <li key={m.id}>
+                          <Link href="/home" className="hover:underline">
+                            {m.title}
+                          </Link>{" "}
+                          <Tag tone={nextDue(m).state === "overdue" ? "urgent" : "neutral"}>
+                            {nextDue(m).offset < 0 ? `${-nextDue(m).offset}d late` : `due ${untilLabel(nextDue(m).offset)}`}
+                          </Tag>
+                        </li>
+                      ))}
+                      {tCover.map((c) => (
+                        <li key={c.id}>
+                          <Link href="/home" className="hover:underline">
+                            {c.title}
+                          </Link>{" "}
+                          <Tag tone="neutral">{c.kind === "insurance" ? "renews" : "ends"} {untilLabel(c.endsOffset)}</Tag>
                         </li>
                       ))}
                     </Group>

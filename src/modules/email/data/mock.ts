@@ -74,7 +74,7 @@ export const MESSAGES: Message[] = [
   },
   {
     id: "m9", account: "home", from: "Cedar Coast Airlines", fromAddress: "trips@cedarcoast.example",
-    subject: "Your trip to Lisbon: check-in opens soon", preview: "Confirmation KG7Q2X. Seat 14A…",
+    subject: "Your trip to Lisbon is booked", preview: "Confirmation KG7Q2X. Seat 14A…",
     receivedDayOffset: -3, time: "2:30 PM", category: "receipt", needsAction: false, urgent: false, unread: false,
     summary: "Flight confirmation for the Lisbon trip. Check-in opens 24 hours before departure.",
     threadId: "t-lisbon",

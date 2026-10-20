@@ -14,7 +14,7 @@ export function ThreadTag({ id, link = true }: { id: string; link?: boolean }) {
       {thread.name}
     </>
   );
-  const cls = "inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-semibold";
+  const cls = "inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-semibold text-ink";
   return link ? (
     <Link href={`/threads#${thread.id}`} className={cls + " hover:bg-surface-2"}>
       {body}

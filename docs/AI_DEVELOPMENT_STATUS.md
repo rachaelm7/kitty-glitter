@@ -17,9 +17,28 @@ PRs are stacked because each builds on the last. Merge them in order; GitHub ret
 | 2 | `claude/app-foundation` | #1 | Next.js PWA: Today, Inbox, Cleanup, Tasks, More | PR #2 open |
 | 3 | `claude/brain-dump` | #2 | Brain Dump, Life Threads | PR #3 open |
 | 4 | `claude/appointment-concierge` | #3 | Appointment Concierge | PR #4 open |
-| 5 | `claude/email-rescue` | #4 | Email Rescue Mode | PR open |
+| 5 | `claude/email-rescue` | #4 | Email Rescue Mode | PR #5 open |
+| 6 | `claude/travel-home` | #5 | Travel & Home dashboards | PR open |
 
 ## Increments
+
+### Priority 4: Travel & Home, connected by Life Threads
+**Branch:** `claude/travel-home`
+
+Built
+- **Travel** (`/travel`): two fictional trips. The Lisbon getaway has a header with dates and a countdown, a day-by-day **itinerary** of reservations (flights, stay, activity, dinner, train) with made-up confirmation codes, and a **packing list** grouped by type with progress, check-off and add item. It also shows **trip tasks** from the Lisbon Life Thread, plus reminders drawn only from the trip's own data (for example, documents not yet packed).
+- **Home** (`/home`): a **maintenance** schedule where the next due date is worked out from "every N days" and "last done", shown as Overdue / Due soon / On track, with **Mark done**. Also **insurance and warranty** reminders (auto and renters insurance, dishwasher and laptop warranties) with renewal or end dates, and **home tasks** from the Home upkeep thread.
+- **Life Threads** now also gather trips (bookings and packing %), home upkeep, and insurance and warranties. Thread tags on Travel and Home link straight to the right thread.
+- Each is its own module (`modules/travel`, `modules/home`) with a public `index.ts`, so either can change without touching the other.
+
+Tests
+- Unit: 7 tests (packing progress and grouping, itinerary only from booked days, reminders never invent deadlines, next-due maths, ordering, coverage window).
+- End-to-end: Travel packing (check and add) and the thread link; Home overdue → Mark done → On track, plus insurance renewals. Both run at both sizes.
+
+Known gaps
+- You can't create or edit trips, bookings, maintenance items or policies yet. Packing and Mark done are the only edits.
+- "Mark done" sets "last done" to today, with no history yet.
+
 
 ### Priority 3: Email Rescue Mode
 **Branch:** `claude/email-rescue`
@@ -113,5 +132,5 @@ Known gaps
 | 1 | Brain Dump / Quick Capture | Built, in review (PR from `claude/brain-dump`) |
 | 2 | Appointment Concierge | Built, in review (PR from `claude/appointment-concierge`) |
 | 3 | Email Rescue Mode | Built, in review (PR from `claude/email-rescue`) |
-| 4 | Travel & Home with Life Threads | Not started |
+| 4 | Travel & Home with Life Threads | Built, in review (PR from `claude/travel-home`) |
 | 5 | UI/UX polish (widgets, states, motion) | Not started |
