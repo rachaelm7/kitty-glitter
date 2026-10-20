@@ -6,6 +6,7 @@ Status: `idea` · `ready` · `in progress` · `done`
 
 | # | Item | Phase | Status | Notes |
 |---|---|---|---|---|
+| 0 | Clickable prototype | 0 | done | `prototype/life-hub-demo.html` |
 | 1 | Project setup, PWA, themes, tab nav | 1 | ready | Awaiting Rachael's OK on plan |
 | 2 | Today screen | 1 | ready | |
 | 3 | Inbox screen + message detail sheet | 1 | ready | Send disabled |

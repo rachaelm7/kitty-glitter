@@ -2,7 +2,7 @@
 
 **Life Hub**: Rachael's private, mobile-first personal dashboard and assistant. It starts with an Email Command Center.
 
-> Status: **Phase 1 planned, awaiting approval.** No application code yet. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> Status: **Clickable prototype done** ([`prototype/`](prototype/)). **Phase 1** (porting it into a real Next.js PWA) is planned and awaiting approval. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Who does what
 
@@ -25,6 +25,8 @@ docs/
   ARCHITECTURE.md    ← planned code structure and data layer
   WORKFLOW.md        ← ChatGPT → Claude Code → Rachael loop
   decisions/         ← short records of decisions (ADRs)
+prototype/
+  life-hub-demo.html ← original clickable demo (single HTML file, sample data)
 backlog/
   BACKLOG.md         ← single shared backlog (prioritised)
 instructions/

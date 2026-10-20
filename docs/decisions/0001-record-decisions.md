@@ -9,3 +9,4 @@ Keep short notes for decisions that would be hard to rediscover later: context, 
 - Stack: Next.js + TypeScript + Tailwind, PWA, Vercel; Supabase later.
 - Roles: ChatGPT directs and manages, Claude Code implements, Rachael approves.
 - Email is read-only; destructive actions are proposals that need explicit confirmation.
+- The single-file prototype is preserved unchanged in `prototype/` as the design reference; the Next.js app is built alongside it, not on top of it.
