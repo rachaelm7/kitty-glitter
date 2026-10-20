@@ -1,7 +1,7 @@
 // Kitty Glitter service worker: keeps the app shell available offline.
 // Demo data lives in the page bundle, so nothing private is cached here.
-const CACHE = "kg-shell-v1";
-const SHELL = ["/", "/inbox", "/tasks", "/more"];
+const CACHE = "kg-shell-v2";
+const SHELL = ["/", "/inbox", "/tasks", "/more", "/threads", "/capture"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

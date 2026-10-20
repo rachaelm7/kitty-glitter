@@ -2,15 +2,18 @@
 
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
-const ToastContext = createContext<(message: string) => void>(() => {});
+type ToastAction = { label: string; onClick: () => void };
+type Show = (message: string, action?: ToastAction) => void;
+
+const ToastContext = createContext<Show>(() => {});
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [message, setMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; action?: ToastAction } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const show = useCallback((m: string) => {
-    setMessage(m);
+  const show = useCallback<Show>((message, action) => {
+    setToast({ message, action });
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setMessage(null), 3200);
+    timer.current = setTimeout(() => setToast(null), action ? 5000 : 3200);
   }, []);
 
   return (
@@ -20,12 +23,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         role="status"
         aria-live="polite"
         className={
-          "pointer-events-none fixed left-1/2 z-50 w-max max-w-[min(92vw,420px)] -translate-x-1/2 rounded-2xl bg-ink px-4 py-3 text-sm text-bg transition-all duration-200 " +
+          "fixed left-1/2 z-50 flex w-max max-w-[min(92vw,440px)] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink py-2.5 pr-2.5 pl-4 text-sm text-bg shadow-lift transition-all duration-200 " +
           "bottom-[calc(96px+env(safe-area-inset-bottom,0px))] lg:bottom-8 " +
-          (message ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0")
+          (toast ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0")
         }
       >
-        {message}
+        <span className="py-1">{toast?.message}</span>
+        {toast?.action && (
+          <button
+            type="button"
+            onClick={() => {
+              toast.action?.onClick();
+              setToast(null);
+            }}
+            className="min-h-9 rounded-xl bg-bg/15 px-3 font-semibold text-bg hover:bg-bg/25"
+          >
+            {toast.action.label}
+          </button>
+        )}
       </div>
     </ToastContext.Provider>
   );

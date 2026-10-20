@@ -14,6 +14,44 @@ const base = {
 };
 
 export const Icon = {
+  /** Delicate cat silhouette with a sparkle: the Kitty Glitter mark. */
+  Cat: (p: P) => (
+    <svg {...base} {...p}>
+      <path d="M5 9.5V4.5l3.6 3a8.6 8.6 0 0 1 6.8 0l3.6-3v5c.6 1 1 2.2 1 3.5 0 4-3.6 7-8 7s-8-3-8-7c0-1.3.4-2.5 1-3.5z" />
+      <path d="M9.5 13.2h.01M14.5 13.2h.01M11 16c.6.5 1.4.5 2 0" />
+      <path d="M20.5 1.8l.4 1.1 1.1.4-1.1.4-.4 1.1-.4-1.1-1.1-.4 1.1-.4z" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  Archive: (p: P) => (
+    <svg {...base} {...p}><rect x="3" y="4" width="18" height="5" rx="1.5" /><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4" /></svg>
+  ),
+  Mail: (p: P) => (
+    <svg {...base} {...p}><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M4 7l8 6 8-6" /></svg>
+  ),
+  MailOpen: (p: P) => (
+    <svg {...base} {...p}><path d="M3 10l9-6 9 6v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M4 10.5l8 5.5 8-5.5" /></svg>
+  ),
+  Star: (p: P) => (
+    <svg {...base} {...p}><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" /></svg>
+  ),
+  Pencil: (p: P) => (
+    <svg {...base} {...p}><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13.5 6.5l4 4" /></svg>
+  ),
+  Clock: (p: P) => (
+    <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+  ),
+  Wallet: (p: P) => (
+    <svg {...base} {...p}><path d="M4 7a2 2 0 0 1 2-2h11v4" /><rect x="3" y="7" width="18" height="13" rx="3" /><path d="M16 13.5h2" /></svg>
+  ),
+  Heart: (p: P) => (
+    <svg {...base} {...p}><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
+  ),
+  Settings: (p: P) => (
+    <svg {...base} {...p}><circle cx="12" cy="12" r="3" /><path d="M12 2.8v2.4M12 18.8v2.4M4.2 6.2l1.7 1.7M18.1 16.1l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.2 17.8l1.7-1.7M18.1 7.9l1.7-1.7" /></svg>
+  ),
+  Undo: (p: P) => (
+    <svg {...base} {...p}><path d="M9 14L4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>
+  ),
   Today: (p: P) => (
     <svg {...base} {...p}><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
   ),

@@ -11,7 +11,7 @@ const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: "Kitty Glitter", template: "%s · Kitty Glitter" },
-  description: "A calm personal life hub. Demo with fictional data.",
+  description: "A calm, beautiful personal life assistant. Demo mode with fictional data.",
   applicationName: "Kitty Glitter",
   appleWebApp: { capable: true, title: "Kitty Glitter", statusBarStyle: "default" },
   formatDetection: { telephone: false },
@@ -23,8 +23,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f1f5f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e1a19" },
+    { media: "(prefers-color-scheme: light)", color: "#fbf8f3" },
+    { media: "(prefers-color-scheme: dark)", color: "#1d1a1c" },
   ],
 };
 

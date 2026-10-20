@@ -1,57 +1,77 @@
 @import "tailwindcss";
 
-/* Theme tokens. Light is the default; dark applies via the OS setting (auto)
-   or an explicit data-theme on <html>, set before first paint. */
+/* Theme tokens: warm ivory and pearl, dusty rose, muted lavender, soft
+   champagne, charcoal text. Light is the default; dark applies via the OS
+   setting (auto) or an explicit data-theme on <html>, set before first paint.
+   Every text/background pair here meets WCAG AA (4.5:1). */
 :root {
-  --bg: #f1f5f3;
+  --bg: #fbf8f3;
   --surface: #ffffff;
-  --surface-2: #e8efec;
-  --ink: #14302e;
-  --muted: #536b68;
-  --line: #d9e3e0;
-  --accent: #24706a;
+  --surface-2: #f4eee7;
+  --ink: #2e2a2b;
+  --muted: #6a6064;
+  --line: #ebe3db;
+  --accent: #9a515d;
   --accent-ink: #ffffff;
-  --accent-soft: #dceeea;
-  --urgent: #b2365a;
+  --accent-soft: #f7e9ea;
+  --lavender: #6f5fa0;
+  --lavender-soft: #efebf6;
+  --champagne: #7d5f31;
+  --champagne-soft: #f6eee1;
+  --urgent: #a32e50;
   --urgent-ink: #ffffff;
-  --urgent-soft: #f8e4ea;
-  --scrim: rgb(10 25 24 / 0.45);
+  --urgent-soft: #fbe7ec;
+  --scrim: rgb(46 34 38 / 0.38);
+  --shadow-color: 60 40 44;
+  --shadow-strength: 0.07;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1a19;
-    --surface: #152524;
-    --surface-2: #1b2e2c;
-    --ink: #e4efec;
-    --muted: #9ab1ad;
-    --line: #263a38;
-    --accent: #6cc4bb;
-    --accent-ink: #0b1f1d;
-    --accent-soft: #1b3633;
-    --urgent: #f08fa9;
+    --bg: #1d1a1c;
+    --surface: #262225;
+    --surface-2: #302b2e;
+    --ink: #f4eee9;
+    --muted: #bbb0ae;
+    --line: #3b3538;
+    --accent: #e6aab3;
+    --accent-ink: #2b171b;
+    --accent-soft: #3b2a2f;
+    --lavender: #c3b7e6;
+    --lavender-soft: #2e2a3a;
+    --champagne: #e1c79b;
+    --champagne-soft: #352e25;
+    --urgent: #f4a0b5;
     --urgent-ink: #2a0f18;
-    --urgent-soft: #3a1f2a;
+    --urgent-soft: #46242f;
     --scrim: rgb(0 0 0 / 0.6);
+    --shadow-color: 0 0 0;
+    --shadow-strength: 0.35;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #0e1a19;
-  --surface: #152524;
-  --surface-2: #1b2e2c;
-  --ink: #e4efec;
-  --muted: #9ab1ad;
-  --line: #263a38;
-  --accent: #6cc4bb;
-  --accent-ink: #0b1f1d;
-  --accent-soft: #1b3633;
-  --urgent: #f08fa9;
+  --bg: #1d1a1c;
+  --surface: #262225;
+  --surface-2: #302b2e;
+  --ink: #f4eee9;
+  --muted: #bbb0ae;
+  --line: #3b3538;
+  --accent: #e6aab3;
+  --accent-ink: #2b171b;
+  --accent-soft: #3b2a2f;
+  --lavender: #c3b7e6;
+  --lavender-soft: #2e2a3a;
+  --champagne: #e1c79b;
+  --champagne-soft: #352e25;
+  --urgent: #f4a0b5;
   --urgent-ink: #2a0f18;
-  --urgent-soft: #3a1f2a;
+  --urgent-soft: #46242f;
   --scrim: rgb(0 0 0 / 0.6);
+  --shadow-color: 0 0 0;
+  --shadow-strength: 0.35;
   color-scheme: dark;
 }
 
@@ -69,6 +89,10 @@
   --color-urgent-ink: var(--urgent-ink);
   --color-urgent-soft: var(--urgent-soft);
   --color-scrim: var(--scrim);
+  --color-lavender: var(--lavender);
+  --color-lavender-soft: var(--lavender-soft);
+  --color-champagne: var(--champagne);
+  --color-champagne-soft: var(--champagne-soft);
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 }
@@ -98,6 +122,14 @@
   button:not(:disabled), [role="button"] {
     cursor: pointer;
   }
+}
+
+/* Soft, warm shadows for cards and floating elements. */
+@utility shadow-soft {
+  box-shadow: 0 1px 2px rgb(var(--shadow-color) / calc(var(--shadow-strength) * 0.6)), 0 8px 24px -6px rgb(var(--shadow-color) / var(--shadow-strength));
+}
+@utility shadow-lift {
+  box-shadow: 0 2px 4px rgb(var(--shadow-color) / calc(var(--shadow-strength) * 0.7)), 0 18px 40px -10px rgb(var(--shadow-color) / calc(var(--shadow-strength) * 1.6));
 }
 
 /* Safe areas for the iPhone notch and home indicator. */

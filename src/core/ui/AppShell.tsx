@@ -21,7 +21,7 @@ function isActive(pathname: string, href: string) {
 export function AppShell({ children, extras }: { children: ReactNode; extras?: ReactNode }) {
   const pathname = usePathname();
   const tabHrefs = new Set<string>(TABS.map((t) => t.href));
-  const moduleLinks = MODULES.filter((m) => m.status === "live" && m.href && !tabHrefs.has(m.href));
+  const moduleLinks = MODULES.filter((m) => m.status !== "planned" && m.href && !tabHrefs.has(m.href));
   const onModulePage = moduleLinks.some((m) => isActive(pathname, m.href!));
 
   return (
@@ -31,9 +31,11 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
       </a>
 
       {/* Desktop side navigation */}
-      <nav aria-label="Main" className="sticky top-0 hidden h-dvh w-64 flex-none flex-col border-r border-line bg-surface px-4 py-6 lg:flex">
+      <nav aria-label="Main" className="sticky top-0 hidden h-dvh w-64 flex-none flex-col border-r border-line bg-surface/70 px-4 py-6 lg:flex">
         <Link href="/" className="mb-8 flex items-center gap-2 px-2">
-          <span className="grid size-9 place-items-center rounded-xl bg-accent font-display text-lg font-semibold text-accent-ink">K</span>
+          <span className="grid size-10 place-items-center rounded-2xl bg-accent-soft text-accent">
+            <Icon.Cat width={24} height={24} />
+          </span>
           <span className="font-display text-xl font-semibold">Kitty Glitter</span>
         </Link>
         {pathname !== "/capture" && (
@@ -67,11 +69,12 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
             </ul>
           </>
         )}
-        <p className="mt-auto px-3 text-xs text-muted">Demo with fictional data. Nothing is connected to real accounts.</p>
+        <p className="mt-auto px-3 text-xs text-muted">Every name, email and date here is fictional. Nothing is connected to real accounts.</p>
       </nav>
 
       <div className="min-w-0 flex-1">
-        <main id="main" className="mx-auto w-full max-w-[1040px] px-4 pt-[calc(20px+env(safe-area-inset-top,0px))] pb-[calc(112px+env(safe-area-inset-bottom,0px))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-16">
+        <DemoBanner />
+        <main id="main" className="mx-auto w-full max-w-[1040px] px-4 pt-5 pb-[calc(112px+env(safe-area-inset-bottom,0px))] sm:px-6 lg:px-10 lg:pt-8 lg:pb-16">
           {children}
         </main>
       </div>
@@ -92,7 +95,7 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
                     href="/capture"
                     aria-label="Brain dump"
                     aria-current={pathname === "/capture" ? "page" : undefined}
-                    className="grid size-12 place-items-center rounded-2xl bg-accent text-accent-ink transition-transform active:scale-95"
+                    className="grid size-12 place-items-center rounded-2xl bg-accent text-accent-ink shadow-soft transition-transform active:scale-95"
                   >
                     <Icon.Plus width={26} height={26} />
                   </Link>
@@ -133,5 +136,20 @@ function NavLink({ href, active, icon, children }: { href: string; active: boole
       {icon}
       <span className="truncate">{children}</span>
     </Link>
+  );
+}
+
+/** Shown on every screen: this is a public demo with made-up data. */
+function DemoBanner() {
+  return (
+    <div
+      role="note"
+      aria-label="Demo mode: fictional data"
+      className="sticky top-0 z-30 border-b border-line bg-champagne-soft/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur"
+    >
+      <p className="flex min-h-8 items-center justify-center gap-1.5 px-4 text-[11px] font-bold tracking-[0.14em] text-champagne uppercase">
+        <Icon.Sparkle width={12} height={12} aria-hidden /> Demo mode — fictional data
+      </p>
+    </div>
   );
 }

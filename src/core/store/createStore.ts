@@ -18,7 +18,8 @@ export type Store<T> = {
 
 const registry: Store<unknown>[] = [];
 
-export function createStore<T>(key: string, seed: T, version = 1): Store<T> {
+export function createStore<T>(key: string, seed: T, version = 1, opts: { persist?: boolean } = {}): Store<T> {
+  const persist = opts.persist ?? true;
   const storageKey = `kg:${key}:v${version}`;
   let state: T = seed;
   let loaded = false;
@@ -27,6 +28,7 @@ export function createStore<T>(key: string, seed: T, version = 1): Store<T> {
   function load() {
     if (loaded || typeof window === "undefined") return;
     loaded = true;
+    if (!persist) return;
     try {
       const raw = window.localStorage.getItem(storageKey);
       if (raw) state = JSON.parse(raw) as T;
@@ -36,6 +38,7 @@ export function createStore<T>(key: string, seed: T, version = 1): Store<T> {
   }
 
   function save() {
+    if (!persist) return;
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(state));
     } catch {

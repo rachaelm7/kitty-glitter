@@ -29,7 +29,7 @@ export function Button({ variant = "primary", size = "md", className, ...props }
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx("rounded-2xl border border-line bg-surface p-4", className)}>{children}</div>;
+  return <div className={cx("rounded-[22px] border border-line/70 bg-surface p-4 shadow-soft", className)}>{children}</div>;
 }
 
 export function Section({
@@ -68,7 +68,7 @@ export function PageHeader({ title, subtitle, children }: { title: string; subti
   );
 }
 
-export function Tag({ children, tone = "accent" }: { children: ReactNode; tone?: "accent" | "urgent" | "neutral" }) {
+export function Tag({ children, tone = "accent" }: { children: ReactNode; tone?: "accent" | "urgent" | "neutral" | "lavender" | "champagne" }) {
   return (
     <span
       className={cx(
@@ -76,6 +76,8 @@ export function Tag({ children, tone = "accent" }: { children: ReactNode; tone?:
         tone === "accent" && "bg-accent-soft text-accent",
         tone === "urgent" && "bg-urgent-soft text-urgent",
         tone === "neutral" && "bg-surface-2 text-muted",
+        tone === "lavender" && "bg-lavender-soft text-lavender",
+        tone === "champagne" && "bg-champagne-soft text-champagne",
       )}
     >
       {children}
@@ -179,7 +181,7 @@ export function Dot({ color, className }: { color: string; className?: string })
 export function EmptyState({ title, children, icon }: { title: string; children?: ReactNode; icon?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line px-6 py-10 text-center">
-      <div className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent">{icon ?? <Icon.Sparkle />}</div>
+      <div className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent">{icon ?? <Icon.Cat />}</div>
       <p className="font-display text-lg font-semibold">{title}</p>
       {children && <div className="max-w-sm text-sm text-muted">{children}</div>}
     </div>
@@ -204,7 +206,7 @@ export function SkeletonRows({ rows = 3 }: { rows?: number }) {
   return (
     <div role="status" aria-busy="true" aria-label="Loading" className="space-y-3">
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="space-y-2 rounded-2xl border border-line bg-surface p-4">
+        <div key={i} className="space-y-2 rounded-[22px] border border-line/70 bg-surface shadow-soft p-4">
           <div className="skeleton h-3.5 w-1/3" />
           <div className="skeleton h-4 w-3/4" />
           <div className="skeleton h-3.5 w-1/2" />
@@ -216,8 +218,8 @@ export function SkeletonRows({ rows = 3 }: { rows?: number }) {
 
 export function DemoBadge() {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-[13px] font-semibold text-accent">
-      <Icon.Sparkle width={14} height={14} /> Demo · fictional data
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-champagne-soft px-3 py-1 text-[13px] font-semibold text-champagne">
+      <Icon.Sparkle width={14} height={14} /> Demo mode · fictional data
     </span>
   );
 }
