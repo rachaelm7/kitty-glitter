@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { MODULES } from "@/config/modules";
 import { Icon } from "./icons";
 import { cx } from "./primitives";
@@ -36,6 +36,11 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
           <span className="grid size-9 place-items-center rounded-xl bg-accent font-display text-lg font-semibold text-accent-ink">K</span>
           <span className="font-display text-xl font-semibold">Kitty Glitter</span>
         </Link>
+        {pathname !== "/capture" && (
+          <Link href="/capture" className="mb-5 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-3 font-semibold text-accent-ink hover:brightness-105">
+            <Icon.Plus width={20} height={20} /> Brain dump
+          </Link>
+        )}
         <ul className="space-y-1">
           {TABS.map((t) => (
             <li key={t.href}>
@@ -73,13 +78,27 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
 
       {extras}
 
+
       {/* Phone tab bar */}
       <nav aria-label="Tabs" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-2.5 pt-1.5 pb-[calc(8px+env(safe-area-inset-bottom,0px))] backdrop-blur lg:hidden">
         <ul className="mx-auto flex max-w-xl">
-          {TABS.map((t) => {
-            const active = isActive(pathname, t.href) || (t.href === "/more" && onModulePage);
+          {TABS.map((t, i) => {
+            const active = isActive(pathname, t.href) || (t.href === "/more" && onModulePage && pathname !== "/capture");
             return (
-              <li key={t.href} className="flex-1">
+              <Fragment key={t.href}>
+              {i === 2 && (
+                <li className="flex flex-1 items-center justify-center">
+                  <Link
+                    href="/capture"
+                    aria-label="Brain dump"
+                    aria-current={pathname === "/capture" ? "page" : undefined}
+                    className="grid size-12 place-items-center rounded-2xl bg-accent text-accent-ink transition-transform active:scale-95"
+                  >
+                    <Icon.Plus width={26} height={26} />
+                  </Link>
+                </li>
+              )}
+              <li className="flex-1">
                 <Link
                   href={t.href}
                   aria-current={active ? "page" : undefined}
@@ -92,6 +111,7 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
                   {t.label}
                 </Link>
               </li>
+              </Fragment>
             );
           })}
         </ul>

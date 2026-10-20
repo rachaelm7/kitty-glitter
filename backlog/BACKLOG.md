@@ -16,7 +16,7 @@ Status: `idea` · `ready` · `in progress` · `done`
 | 7 | Vercel deploy + preview link | 1 | ready | Needs Vercel connected to repo |
 | 8 | Supabase login locked to owner email | 2 | idea | |
 | 9 | Gmail read-only OAuth (one account) | 3 | idea | |
-| 10 | Brain Dump / Quick Capture | 1b | ready | Review before adding; no invented dates |
+| 10 | Brain Dump / Quick Capture | 1b | in review | Review before adding; no invented dates |
 | 11 | Appointment Concierge | 1b | ready | Not medical advice |
 | 12 | Email Rescue Mode | 1b | ready | Important-email protection |
 | 13 | Travel & Home dashboards + Life Threads | 1b | ready | |

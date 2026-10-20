@@ -14,9 +14,30 @@ PRs are stacked because each builds on the last. Merge them in order; GitHub ret
 | # | Branch | Builds on | Contents | State |
 |---|---|---|---|---|
 | 1 | `claude/life-hub-phase-1-27ixfq` | `main` | Docs, prototype, Claude GitHub Actions | PR #1 open |
-| 2 | `claude/app-foundation` | #1 | Next.js PWA: Today, Inbox, Cleanup, Tasks, More | PR open |
+| 2 | `claude/app-foundation` | #1 | Next.js PWA: Today, Inbox, Cleanup, Tasks, More | PR #2 open |
+| 3 | `claude/brain-dump` | #2 | Brain Dump, Life Threads | PR open |
 
 ## Increments
+
+### Priority 1: Brain Dump / Quick Capture, and Life Threads
+**Branch:** `claude/brain-dump`
+
+Built
+- **Brain dump** (`/capture`): write freely, or use a **simulated** voice note that "transcribes" one of three fictional recordings word by word. The microphone is never used, and the sheet says so. The draft is kept if you leave the screen.
+- **Sort it out**: a rule-based parser that runs on the device, with no AI and no network. It splits the text into thoughts and suggests a Task, Reminder or Thread note for each. It also suggests a Life Thread from keywords.
+- **Review screen**: nothing is added until you press **Add**. For each suggestion you can switch it off, edit the title, change its type, pick or create a Life Thread, or set or remove a date. The original words are shown under each one.
+- **No invented dates:** a date is only set when the words say one explicitly (today, tomorrow, a weekday, "in N days", "Nov 3"), and the phrase it came from is shown. Vague timing ("next week", "soon") becomes a hint only.
+- **Life Threads** (`/threads`): seeded threads (Car & insurance, Health appointments, Lisbon trip, Home upkeep) gather linked tasks, emails, dates and notes from every module. Tasks show a thread tag.
+- Navigation: a centred **+** in the phone tab bar, a **Brain dump** button in the desktop nav, and both modules listed under More.
+
+Tests
+- Unit: 6 parser tests (splitting, never inventing dates, explicit date reading, title clean-up, classification and thread suggestion).
+- End-to-end: the review-before-add flow (with a date only where one was said, a note needing a thread, a new thread, an excluded item) and the simulated voice flow, at both sizes.
+
+Known gaps
+- The parser is deliberately simple. Long run-on sentences ("the filter is overdue, I should order one") stay as one suggestion for you to edit.
+- Life Thread notes can't be edited or deleted yet.
+
 
 ### Foundation: prototype ported to Next.js PWA
 **Branch:** `claude/app-foundation`
@@ -48,7 +69,7 @@ Known gaps
 ## Secondary queue
 | Priority | Feature | State |
 |---|---|---|
-| 1 | Brain Dump / Quick Capture | Not started |
+| 1 | Brain Dump / Quick Capture | Built, in review (PR from `claude/brain-dump`) |
 | 2 | Appointment Concierge | Not started |
 | 3 | Email Rescue Mode | Not started |
 | 4 | Travel & Home with Life Threads | Not started |
