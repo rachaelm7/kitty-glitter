@@ -12,7 +12,9 @@
 | Creative director & project manager | ChatGPT | Vision, design direction, priorities, writes instruction briefs and backlog items. |
 | Implementation | Claude Code | Builds, tests, commits and pushes; reports back. |
 
-How work moves between them: [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
+How work moves between them: [`docs/WORKFLOW.md`](docs/WORKFLOW.md). Automation setup: [`docs/AUTOMATION.md`](docs/AUTOMATION.md).
+
+> **This repository is public.** Fictional sample data only. Never commit secrets or personal information.
 
 ## Repository map
 
@@ -24,6 +26,7 @@ docs/
   ROADMAP.md         ← phases and their status
   ARCHITECTURE.md    ← planned code structure and data layer
   WORKFLOW.md        ← ChatGPT → Claude Code → Rachael loop
+  AUTOMATION.md      ← GitHub Actions setup: claude-ready issues → draft PRs
   decisions/         ← short records of decisions (ADRs)
 prototype/
   life-hub-demo.html ← original clickable demo (single HTML file, sample data)
@@ -33,7 +36,7 @@ instructions/
   TEMPLATE.md        ← format for a brief from ChatGPT to Claude Code
   inbox/             ← briefs waiting to be implemented
   done/              ← briefs that have been completed (kept for history)
-.github/             ← issue + PR templates (for future automation)
+.github/             ← Claude + CI workflows, issue + PR templates
 ```
 
 Application code (Next.js) will live in `src/` once Phase 1 is approved.

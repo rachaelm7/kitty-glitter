@@ -1,0 +1,51 @@
+# Follow-up requests: Rachael can write "@claude ..." in an issue or PR
+# comment or review to ask for changes. Comments from anyone else are ignored.
+name: Claude – @claude follow-ups
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude:
+    if: >-
+      (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+          github.event.comment.user.login == 'rachaelm7') ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+          github.event.comment.user.login == 'rachaelm7') ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+          github.event.review.user.login == 'rachaelm7')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_bots: ""
+          include_comments_by_actor: "rachaelm7"
+          claude_args: |
+            --max-turns 50
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm ci),Bash(npm install:*),Bash(npm run lint:*),Bash(npm run typecheck:*),Bash(npm run build:*),Bash(npm test:*),Bash(npx tsc:*),Bash(gh pr view:*),Bash(gh issue view:*)"
+            --disallowedTools "Bash(gh pr merge:*),Bash(gh pr ready:*),Bash(gh pr review:*),Bash(gh workflow:*),Bash(gh secret:*),Bash(vercel:*),Bash(npx vercel:*)"
+            --append-system-prompt "Follow CLAUDE.md. The repo is public: fictional data only, never secrets or personal information. Do not edit .github/. Never merge or deploy."

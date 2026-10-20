@@ -13,13 +13,10 @@ Claude Code: plan → (Rachael OK) → build → push to feature branch
 Rachael reviews the preview, merges, gives feedback → ChatGPT
 ```
 
-## Today (manual)
-Rachael copies a brief from ChatGPT into `instructions/inbox/` (or pastes it into Claude Code) and Claude Code takes it from there.
+## Automated (GitHub issues)
+ChatGPT opens an issue with the **Claude-ready spec** template and the `claude-ready` label. Claude builds it and opens a draft PR. Full setup and safeguards: [`AUTOMATION.md`](AUTOMATION.md).
 
-## Later (automated, not set up yet)
-Possible next steps once the manual loop feels right:
-- Backlog items become GitHub Issues using `.github/ISSUE_TEMPLATE/`.
-- A GitHub Action or scheduled Claude Code routine picks up new briefs in `instructions/inbox/` or issues with a `ready` label.
-- PRs use `.github/pull_request_template.md` so reviews stay consistent.
+## Manual fallback
+Rachael pastes a brief into `instructions/inbox/` or straight into a Claude Code session.
 
-Rachael stays the approval gate in every version: no merge and no real-account action without her.
+Rachael stays the approval gate in every version: no merge, deploy or real-account action without her.
