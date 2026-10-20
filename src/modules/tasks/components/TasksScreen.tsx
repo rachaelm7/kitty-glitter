@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useNow, relativeDay } from "@/core/date";
+import { useNow, relativeDay, startOfDay } from "@/core/date";
+import { ThreadTag } from "@/modules/threads";
 import { useStore } from "@/core/store/createStore";
 import { Button, CheckCircle, EmptyState, PageHeader, Segmented, Tag, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
@@ -77,8 +78,10 @@ export function TasksScreen() {
               <div className="min-w-0 flex-1">
                 <p className={cx("break-words", t.done && "line-through")}>{t.title}</p>
                 <div className="mt-1 flex flex-wrap gap-1.5">
+                  {t.kind === "reminder" && <Tag tone="neutral">Reminder</Tag>}
                   {t.fromEmail && <Tag>From email · {t.fromEmail.sender}</Tag>}
-                  {t.dueDayOffset !== undefined && <Tag tone="neutral">Due {relativeDay(t.dueDayOffset, now)}</Tag>}
+                  {dueOffset(t, now) !== undefined && <Tag tone="neutral">Due {relativeDay(dueOffset(t, now)!, now)}</Tag>}
+                  {t.threadId && <ThreadTag id={t.threadId} />}
                 </div>
               </div>
               <button
@@ -95,4 +98,9 @@ export function TasksScreen() {
       )}
     </div>
   );
+}
+
+function dueOffset(t: { dueDayOffset?: number; dueDate?: string }, now: Date) {
+  if (t.dueDate) return Math.round((new Date(t.dueDate + "T00:00:00").getTime() - startOfDay(now).getTime()) / 86_400_000);
+  return t.dueDayOffset;
 }

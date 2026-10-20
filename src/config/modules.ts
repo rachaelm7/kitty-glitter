@@ -15,7 +15,8 @@ export type ModuleEntry = {
 export const MODULES: ModuleEntry[] = [
   { key: "email", name: "Email Command Center", href: "/inbox", status: "live", blurb: "Five accounts, one calm inbox", icon: "Inbox" },
   { key: "tasks", name: "Tasks", href: "/tasks", status: "live", blurb: "Checklist, some pulled from email", icon: "Tasks" },
-  { key: "capture", name: "Brain Dump", status: "planned", blurb: "Type or talk, review before anything is added", icon: "Mic" },
+  { key: "capture", name: "Brain Dump", href: "/capture", status: "live", blurb: "Type or talk, review before anything is added", icon: "Mic" },
+  { key: "threads", name: "Life Threads", href: "/threads", status: "live", blurb: "Related tasks, mail and dates together", icon: "Thread" },
   { key: "appointments", name: "Appointment Concierge", status: "planned", blurb: "Referrals, scheduling and follow-ups", icon: "Stethoscope" },
   { key: "rescue", name: "Email Rescue Mode", status: "planned", blurb: "Calm path through a huge unread pile", icon: "Lifebuoy" },
   { key: "travel", name: "Travel", status: "planned", blurb: "Trips, packing and reservations", icon: "Plane" },
