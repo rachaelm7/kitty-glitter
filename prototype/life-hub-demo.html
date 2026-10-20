@@ -161,7 +161,7 @@ textarea{width:100%;min-height:110px;padding:12px;border-radius:14px;border:1.5p
 <main class="app">
 
 <section id="v-today" class="view">
-  <h1 id="greet">Good day, Rachael</h1>
+  <h1 id="greet">Good day, Juniper</h1>
   <p class="sub" id="datel"></p>
   <span class="demo">Demo with sample data</span>
 
@@ -320,7 +320,7 @@ textarea{width:100%;min-height:110px;padding:12px;border-radius:14px;border:1.5p
 
   /* Greeting */
   var now=new Date(),hr=now.getHours();
-  $('#greet').textContent=(hr<12?'Good morning':hr<18?'Good afternoon':'Good evening')+', Rachael';
+  $('#greet').textContent=(hr<12?'Good morning':hr<18?'Good afternoon':'Good evening')+', Juniper';
   $('#datel').textContent=now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
 
   /* Today */

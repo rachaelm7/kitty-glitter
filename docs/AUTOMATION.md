@@ -1,4 +1,4 @@
-# Automation: ChatGPT → GitHub issue → Claude → draft PR → Rachael
+# Automation: ChatGPT → GitHub issue → Claude → draft PR → the owner
 
 ## How it works
 1. **ChatGPT** (product manager / creative director) writes a GitHub issue using the **Claude-ready spec** template.
@@ -10,9 +10,9 @@
    - runs lint / typecheck / build (once the app exists),
    - opens a **draft** pull request that says `Closes #<n>`.
 4. **CI** (`.github/workflows/ci.yml`) checks the PR and scans it for secrets.
-5. **Rachael** reviews the PR (and its Vercel preview, once Vercel is connected). To ask for changes, comment `@claude <what to change>` on the PR. When happy, mark it ready and merge.
+5. **The owner** reviews the PR (and its Vercel preview, once Vercel is connected). To ask for changes, comment `@claude <what to change>` on the PR. When happy, mark it ready and merge.
 
-Nothing merges, deploys or publishes without Rachael.
+Nothing merges, deploys or publishes without the owner.
 
 ## Safeguards built in
 | Risk | Guard |
@@ -28,7 +28,7 @@ Nothing merges, deploys or publishes without Rachael.
 
 To trust another account (for example, if ChatGPT posts as its own bot, see below), edit the `fromJSON('["rachaelm7"]')` lists in `claude-issue.yml` in a reviewed PR.
 
-## One-time setup (needs Rachael)
+## One-time setup (needs the owner)
 These steps need your accounts, so Claude can't do them for you.
 
 1. **Install the Claude GitHub App** on `rachaelm7/kitty-glitter`: https://github.com/apps/claude, giving it access to *only this repository*. (You may already have done this.)

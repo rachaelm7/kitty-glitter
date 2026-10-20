@@ -3,10 +3,10 @@
 - **From:** ChatGPT (creative director / PM)
 - **Date:** YYYY-MM-DD
 - **Backlog #:** <n>
-- **Pre-approved by Rachael?** yes / no (if no, Claude Code posts a plan first)
+- **Pre-approved by the owner?** yes / no (if no, Claude Code posts a plan first)
 
 ## Goal
-What should exist when this is done, and why it matters to Rachael.
+What should exist when this is done, and why it matters to the owner.
 
 ## Requirements
 - …

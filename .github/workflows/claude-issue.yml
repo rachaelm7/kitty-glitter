@@ -1,6 +1,6 @@
 # Claude picks up issues labeled `claude-ready`, implements them on a new
 # branch, runs the project checks and opens a DRAFT pull request.
-# It never merges or deploys. Rachael reviews and merges.
+# It never merges or deploys. The owner reviews and merges.
 name: Claude – implement issue
 
 on:

@@ -1,2 +1,2 @@
-/** Shown in greetings. Change freely; this demo uses no real personal data. */
-export const DEMO_USER_NAME = "Rachael";
+/** Fictional demo persona shown in greetings. Never put a real name here: the repo is public. */
+export const DEMO_USER_NAME = "Juniper";

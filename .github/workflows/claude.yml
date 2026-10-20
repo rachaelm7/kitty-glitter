@@ -1,4 +1,4 @@
-# Follow-up requests: Rachael can write "@claude ..." in an issue or PR
+# Follow-up requests: the owner can write "@claude ..." in an issue or PR
 # comment or review to ask for changes. Comments from anyone else are ignored.
 name: Claude – @claude follow-ups
 

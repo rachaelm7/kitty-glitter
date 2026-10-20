@@ -14,4 +14,4 @@ ChatGPT writes specs and Claude Code implements them. The repo is public, so any
 - CI runs lint, typecheck, build and a gitleaks secret scan on every PR.
 
 ## Consequences
-Rachael is the only path to `main` and to deployment. If ChatGPT acts as a bot account rather than as Rachael, the trusted list needs a reviewed update.
+The owner is the only path to `main` and to deployment. If ChatGPT acts as a bot account rather than as the owner, the trusted list needs a reviewed update.
