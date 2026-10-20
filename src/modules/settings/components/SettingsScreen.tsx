@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { MODULES } from "@/config/modules";
 import { resetAllStores } from "@/core/store/createStore";
 import { setTheme, useTheme, type ThemeChoice } from "@/core/theme/theme";
 import { Button, Card, PageHeader, Section, Segmented, Tag } from "@/core/ui/primitives";
@@ -9,40 +8,17 @@ import { Icon } from "@/core/ui/icons";
 import { useToast } from "@/core/ui/Toast";
 import { AccountDot, emailProvider } from "@/modules/email";
 
-export function MoreScreen() {
+export function SettingsScreen() {
   const theme = useTheme();
   const toast = useToast();
   const accounts = emailProvider.listAccounts();
-  const live = MODULES.filter((m) => m.status === "live" && m.href && !["/inbox", "/tasks"].includes(m.href));
-  const planned = MODULES.filter((m) => m.status === "planned");
 
   return (
     <div className="max-w-2xl">
-      <PageHeader title="More" subtitle="Settings, modules and what's coming next" />
-
-      {live.length > 0 && (
-        <Section title="Modules" id="modules-live">
-          <ul className="grid gap-2.5 sm:grid-cols-2">
-            {live.map((m) => {
-              const I = Icon[m.icon];
-              return (
-                <li key={m.key}>
-                  <Link href={m.href!} className="flex min-h-16 items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-colors hover:bg-surface-2">
-                    <span className="grid size-10 flex-none place-items-center rounded-xl bg-accent-soft text-accent">
-                      <I />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <b className="block font-semibold">{m.name}</b>
-                      <span className="block truncate text-sm text-muted">{m.blurb}</span>
-                    </span>
-                    <Icon.Chevron className="text-muted" width={20} height={20} />
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </Section>
-      )}
+      <Link href="/more" className="mb-4 inline-flex min-h-11 items-center gap-1 font-semibold text-accent">
+        <Icon.Back width={20} height={20} /> More
+      </Link>
+      <PageHeader title="Settings" subtitle="Appearance, accounts and demo data" />
 
       <Section title="Appearance" id="appearance">
         <Segmented<ThemeChoice>
@@ -77,24 +53,8 @@ export function MoreScreen() {
         <p className="mt-2 text-sm text-muted">Every account and address here is fictional. Email stays read-only; drafts only.</p>
       </Section>
 
-      <Section title="Planned modules" id="planned">
-        <Card className="py-1">
-          <ul>
-            {planned.map((m) => (
-              <li key={m.key} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
-                <span className="min-w-0">
-                  <span className="block font-semibold">{m.name}</span>
-                  <span className="block text-sm text-muted">{m.blurb}</span>
-                </span>
-                <Tag tone="neutral">Planned</Tag>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </Section>
-
       <Section title="For design review" id="design">
-        <Link href="/more/states" className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-colors hover:bg-surface-2">
+        <Link href="/more/states" className="flex min-h-14 items-center gap-3 rounded-[22px] border border-line/70 bg-surface shadow-soft p-3.5 transition-colors hover:bg-surface-2">
           <span className="grid size-10 flex-none place-items-center rounded-xl bg-accent-soft text-accent">
             <Icon.Grid />
           </span>
@@ -109,7 +69,7 @@ export function MoreScreen() {
       <Section title="Demo data" id="demo">
         <Card>
           <p className="text-sm">
-            This is a demo with fictional data. Changes you make are saved only in this browser and nothing is connected to real accounts.
+            DEMO MODE: every person, email, appointment and amount here is fictional. Changes are saved only in this browser, nothing is connected to real accounts, and the app never sends email or contacts anyone.
           </p>
           <Button
             variant="ghost"

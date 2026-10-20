@@ -3,11 +3,66 @@
 Living log of what Claude Code has built, how it was checked, and what is still open.
 Newest increment first. Updated in every PR.
 
-## Where things stand (end of the secondary queue)
-All five secondary-queue priorities are built on stacked branches with open PRs (#2–#7, on top of #1). **Nothing is merged or deployed.**
+## Latest session: Kitty Glitter v2 (branch `claude/kitty-glitter-v2`)
+One PR to `main` that contains everything (it builds on #1–#7, so merging it alone is enough).
 
-Needs Rachael's authorization or action:
-1. Review and merge the PRs **in order** (#1 → #2 → … → #7). Merging #1 first also activates the Claude GitHub Actions workflows.
+### What improved
+- **Rules:** `CLAUDE.md` now opens with the autonomy rule (never ask the owner to do what Claude can do) and the continuous-improvement rule, backed by `.claude/skills/continuous-improvement/SKILL.md`.
+- **Privacy:**
+  - The owner's real name is removed from the app, docs and the preserved prototype. The demo persona is **Juniper**.
+  - Every fictional email address is now `@example.com`, enforced by a unit test and an e2e test.
+  - **DEMO MODE — FICTIONAL DATA** is on every screen.
+- **Design system:** warm ivory and pearl, dusty rose, muted lavender, soft champagne, charcoal text, soft shadows, rounded cards, and a cat-and-sparkle mark (new PWA icons too). Every token pair is checked for AA contrast.
+- **Today:**
+  - The morning brief reads like the approved example.
+  - **Three priorities**, each linking to its email and Life Thread.
+  - Upcoming appointments, tasks needing attention, an important-email preview and a Life Threads preview.
+  - **Quick capture** button. Cards can still be customized.
+- **Inbox Command Center:**
+  - Category tabs: All inboxes, Needs action, Personal, Appointments, Bills, Receipts, Promotions, with unread counts.
+  - Account chips and search that also matches sender addresses.
+  - Read/unread state (opening marks read; mark unread in the sheet).
+  - **Simulated archive with Undo** and an Archived view.
+  - Grouped newsletters, "why it was sorted this way", and a bulk cleanup preview on Promotions.
+  - **Make a task** from an email, linked back to it.
+- **Tasks:**
+  - **Today, Upcoming, Waiting on and Completed** views, with category filters.
+  - Add quickly or with details, plus an **edit sheet** (title, status, waiting on, category, due date, Life Thread, notes, delete with Undo).
+  - Overdue and due tags, and links to the source email and thread. Everything persists on the device.
+- **Life Threads, the signature feature:**
+  - Seven fictional situations: a dental confirmation, an insurance renewal, a medical referral follow-up, a home repair, a purchase return, a social event and a holiday trip.
+  - Each has a **detail page** with status, Next step (opens the right email or task), Waiting on, a merged **timeline** (so far / coming up), emails, tasks, appointments, trip, notes, and Mark done / Reopen.
+- **More:**
+  - Navigation cards with live previews: Life Threads, Appointments, Travel, Home, **Finances** (preview), **Personal Collections** (preview) and **Settings**.
+  - Settings holds theme, accounts and demo reset.
+- **Quick Capture:** "I need to schedule my dentist appointment, order cat food, and check on the insurance renewal." becomes three reviewable tasks with no invented dates. It also suggests the matching threads and categories.
+
+### What was tested (all run in this session)
+- Lint, typecheck and production build: pass.
+- Unit tests (Vitest): **51 passing.**
+- End-to-end (Playwright, iPhone 13 and 1280px desktop): **106 passing.** That covers:
+  - the demo notice and no horizontal scroll on 14 screens
+  - tab navigation
+  - Today links into email, thread and capture
+  - every Inbox interaction
+  - task add, edit, validation, complete and email link
+  - Life Thread detail, notes and done
+  - More, and Settings theme persistence
+  - an example.com-only scan of the rendered text
+  - capture, appointments, rescue, travel/home and polish flows
+  - axe WCAG 2.1 A/AA on 16 screens in light and dark
+- Screenshots reviewed at 375px and 1280px in light and dark mode.
+
+### Next three highest-value improvements
+1. **Swipe actions on Inbox rows** (archive / mark read) with haptic-style feedback on iPhone, plus keyboard shortcuts on desktop.
+2. **Recurring tasks and reminders** (for example "every 90 days" for the furnace filter), shared with Home upkeep so Mark done in one place updates the other.
+3. **A smarter brief and Life Thread "what changed"**: show what moved since yesterday (new emails in a thread, replies you're waiting on) and let the next step update when its task is done.
+
+## Where things stand (end of the secondary queue)
+PRs #1–#7 hold the earlier increments; the v2 PR contains all of them plus this session. **Nothing is merged or deployed.**
+
+Needs the owner's authorization or action:
+1. Review and merge the **v2 PR** into `main` (or merge #1 → #7 in order, then v2).
 2. To see it on your phone: connect the repo to Vercel. Previews will then appear on each PR. Claude can't do this from here.
 3. For the `claude-ready` automation: add the `CLAUDE_CODE_OAUTH_TOKEN` secret and create the `claude-ready` label (see `docs/AUTOMATION.md`).
 
@@ -16,7 +71,7 @@ Not done yet: manual testing on a real iPhone (install to Home Screen, offline, 
 ## Review status: read this first
 - **External review:** none yet. No autonomous ChatGPT reviewer is connected to this repository, so **no change here has been approved by ChatGPT**. Anything listed as "reviewed" below means Claude's own self-review unless it names a person.
 - **Self-review:** Claude runs lint, typecheck, unit tests (Vitest), end-to-end tests (Playwright, at iPhone 13 and 1280px desktop sizes), a production build, and looks at screenshots in light and dark mode before opening a PR.
-- **Approval:** only Rachael merges. Nothing is deployed automatically.
+- **Approval:** only the owner merges. Nothing is deployed automatically.
 
 ## Branch and PR map
 PRs are stacked because each builds on the last. Merge them in order; GitHub retargets the next PR automatically when its base branch is merged and deleted.

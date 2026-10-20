@@ -1,33 +1,37 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ComponentType } from "react";
 import { DEMO_USER_NAME } from "@/config/demo";
 import { formatLongDate, greeting, useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
 import { ErrorBoundary } from "@/core/ui/ErrorBoundary";
-import { Button, DemoBadge, EmptyState, PageHeader, cx } from "@/core/ui/primitives";
+import { Button, EmptyState, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { WIDGETS, visibleWidgets, type WidgetId } from "../data/layout";
 import { layoutStore } from "../data/store";
 import { CustomizeSheet } from "./CustomizeSheet";
 import { AgendaWidget } from "./widgets/Agenda";
 import { BriefWidget } from "./widgets/Brief";
+import { AppointmentsWidget, EmailWidget, TasksWidget, ThreadsWidget } from "./widgets/Glance";
 import { PromosWidget, UnreadWidget } from "./widgets/Mail";
-import { AppointmentsWidget, CaptureWidget, TripWidget, UpkeepWidget } from "./widgets/Modules";
-import { NeedsWidget } from "./widgets/Needs";
+import { TripWidget, UpkeepWidget } from "./widgets/Modules";
+import { PrioritiesWidget } from "./widgets/Priorities";
 import { UpcomingWidget } from "./widgets/Upcoming";
 
 const COMPONENTS: Record<WidgetId, ComponentType> = {
   brief: BriefWidget,
-  needs: NeedsWidget,
+  priorities: PrioritiesWidget,
   appointments: AppointmentsWidget,
+  tasks: TasksWidget,
+  email: EmailWidget,
+  threads: ThreadsWidget,
   agenda: AgendaWidget,
   upcoming: UpcomingWidget,
-  unread: UnreadWidget,
-  promos: PromosWidget,
   trip: TripWidget,
   upkeep: UpkeepWidget,
-  capture: CaptureWidget,
+  unread: UnreadWidget,
+  promos: PromosWidget,
 };
 
 export function TodayScreen() {
@@ -38,21 +42,33 @@ export function TodayScreen() {
 
   return (
     <div>
-      <PageHeader title={`${greeting(now)}, ${DEMO_USER_NAME}`} subtitle={formatLongDate(now)}>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <DemoBadge />
-          <Button size="sm" variant="quiet" onClick={() => setCustomizing(true)}>
-            <Icon.Grid width={16} height={16} /> Customize
+      <header className="flex flex-wrap items-end justify-between gap-4 animate-rise">
+        <div>
+          <p className="text-sm font-semibold text-muted">{formatLongDate(now)}</p>
+          <h1 className="mt-1 text-[34px] leading-[1.1] lg:text-[42px]">
+            {greeting(now)}, {DEMO_USER_NAME}
+            <Icon.Sparkle aria-hidden className="ml-1.5 inline-block -translate-y-3 text-champagne" width={18} height={18} />
+          </h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/capture"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-accent px-4 font-semibold text-accent-ink shadow-soft transition-transform active:scale-[0.98]"
+          >
+            <Icon.Plus width={18} height={18} /> Quick capture
+          </Link>
+          <Button variant="ghost" onClick={() => setCustomizing(true)}>
+            <Icon.Grid width={18} height={18} /> Customize
           </Button>
         </div>
-      </PageHeader>
+      </header>
 
       {ids.length === 0 ? (
         <div className="mt-6">
           <EmptyState title="A blank slate" icon={<Icon.Grid />}>
-            Every widget is hidden.{" "}
+            Every card is hidden.{" "}
             <Button size="sm" variant="quiet" onClick={() => setCustomizing(true)}>
-              Choose widgets
+              Choose cards
             </Button>
           </EmptyState>
         </div>

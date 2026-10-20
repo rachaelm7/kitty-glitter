@@ -1,20 +1,22 @@
 export const WIDGETS = [
   { id: "brief", name: "Morning brief", wide: true },
-  { id: "needs", name: "Needs you" },
-  { id: "appointments", name: "Appointments" },
+  { id: "priorities", name: "Three priorities" },
+  { id: "appointments", name: "Upcoming appointments" },
+  { id: "tasks", name: "Tasks needing attention" },
+  { id: "email", name: "Important email" },
+  { id: "threads", name: "Life Threads" },
   { id: "agenda", name: "Today's agenda" },
-  { id: "upcoming", name: "Coming up" },
-  { id: "unread", name: "Unread by account" },
-  { id: "promos", name: "Promotions to review" },
+  { id: "upcoming", name: "Bills & renewals" },
   { id: "trip", name: "Next trip" },
   { id: "upkeep", name: "Home upkeep" },
-  { id: "capture", name: "Quick capture" },
+  { id: "unread", name: "Unread by account" },
+  { id: "promos", name: "Promotions to review" },
 ] as const;
 
 export type WidgetId = (typeof WIDGETS)[number]["id"];
 export type Layout = { order: WidgetId[]; hidden: WidgetId[] };
 
-export const DEFAULT_LAYOUT: Layout = { order: WIDGETS.map((w) => w.id), hidden: ["capture"] };
+export const DEFAULT_LAYOUT: Layout = { order: WIDGETS.map((w) => w.id), hidden: ["unread", "promos"] };
 
 /** Saved order first, then any widgets added since the layout was saved. Unknown ids are dropped. */
 export function resolveOrder(layout: Layout): WidgetId[] {

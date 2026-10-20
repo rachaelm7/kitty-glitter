@@ -1,13 +1,4 @@
-import { expect, test } from "@playwright/test";
-
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem("kg-test")) {
-      localStorage.clear();
-      sessionStorage.setItem("kg-test", "1");
-    }
-  });
-});
+import { expect, test } from "./helpers";
 
 test("Email Rescue Mode: protected mail, piles, preview, review, simulated confirm", async ({ page }) => {
   await page.goto("/inbox");

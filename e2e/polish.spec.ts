@@ -1,37 +1,28 @@
-import { expect, test } from "@playwright/test";
-
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem("kg-test")) {
-      localStorage.clear();
-      sessionStorage.setItem("kg-test", "1");
-    }
-  });
-});
+import { expect, test } from "./helpers";
 
 test("Today widgets can be hidden, shown and reordered, and it persists", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("region", { name: "Today" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Quick capture" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Unread by account" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Customize" }).click();
   const sheet = page.getByRole("dialog");
   await sheet.getByRole("switch", { name: "Show Today's agenda" }).click();
-  await sheet.getByRole("switch", { name: "Show Quick capture" }).click();
-  await sheet.getByRole("button", { name: "Move Needs you up" }).click();
+  await sheet.getByRole("switch", { name: "Show Unread by account" }).click();
+  await sheet.getByRole("button", { name: "Move Three priorities up" }).click();
   await sheet.getByRole("button", { name: "Done" }).click();
 
   await expect(page.getByRole("region", { name: "Today" })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Quick capture" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Unread by account" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "Today" })).toHaveCount(0);
   const first = page.locator("main section").first();
-  await expect(first).toHaveAttribute("aria-labelledby", "w-needs");
+  await expect(first).toHaveAttribute("aria-labelledby", "w-priorities");
 });
 
-test("All clear celebration when every Needs you item is done", async ({ page }) => {
+test("All clear celebration when every priority is done", async ({ page }) => {
   await page.goto("/");
-  const needs = page.getByRole("region", { name: "Needs you" }).getByRole("checkbox");
+  const needs = page.getByRole("region", { name: "Three priorities" }).getByRole("checkbox");
   for (let i = 0; i < 3; i++) await needs.nth(i).click();
   await expect(page.getByText("All clear. Nicely done.")).toBeVisible();
   await expect(page.getByText(/Nothing urgent is waiting on you/)).toBeVisible();

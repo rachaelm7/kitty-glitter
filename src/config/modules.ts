@@ -1,28 +1,26 @@
 /**
  * Module registry. Drives the desktop side nav and the More screen.
- * Flip a module to "live" when its screens ship.
+ * "live" modules are functional; "preview" modules show sample content.
  */
-export type ModuleStatus = "live" | "planned";
+export type ModuleStatus = "live" | "preview" | "planned";
 export type ModuleEntry = {
   key: string;
   name: string;
   href?: string;
   status: ModuleStatus;
   blurb: string;
-  icon: "Today" | "Inbox" | "Tasks" | "Calendar" | "Stethoscope" | "Plane" | "House" | "Lifebuoy" | "Mic" | "Thread" | "Grid";
+  icon: "Thread" | "Stethoscope" | "Plane" | "House" | "Wallet" | "Heart" | "Settings" | "Mic" | "Lifebuoy" | "Inbox" | "Tasks" | "Grid";
+  tone: "accent" | "lavender" | "champagne";
 };
 
 export const MODULES: ModuleEntry[] = [
-  { key: "email", name: "Email Command Center", href: "/inbox", status: "live", blurb: "Five accounts, one calm inbox", icon: "Inbox" },
-  { key: "tasks", name: "Tasks", href: "/tasks", status: "live", blurb: "Checklist, some pulled from email", icon: "Tasks" },
-  { key: "capture", name: "Brain Dump", href: "/capture", status: "live", blurb: "Type or talk, review before anything is added", icon: "Mic" },
-  { key: "threads", name: "Life Threads", href: "/threads", status: "live", blurb: "Related tasks, mail and dates together", icon: "Thread" },
-  { key: "appointments", name: "Appointments", href: "/appointments", status: "live", blurb: "Concierge for referrals, scheduling and follow-ups", icon: "Stethoscope" },
-  { key: "rescue", name: "Email Rescue", href: "/inbox/rescue", status: "live", blurb: "Calm path through a huge unread pile", icon: "Lifebuoy" },
-  { key: "travel", name: "Travel", href: "/travel", status: "live", blurb: "Trips, packing and reservations", icon: "Plane" },
-  { key: "home", name: "Home", href: "/home", status: "live", blurb: "Maintenance, warranties and insurance", icon: "House" },
-  { key: "calendar", name: "Calendar", status: "planned", blurb: "Full calendar sync", icon: "Calendar" },
-  { key: "finances", name: "Finances", status: "planned", blurb: "Bills and budgets", icon: "Grid" },
-  { key: "health", name: "Health and wellness", status: "planned", blurb: "Habits and check-ins", icon: "Grid" },
-  { key: "projects", name: "Personal projects", status: "planned", blurb: "Ideas and progress", icon: "Grid" },
+  { key: "threads", name: "Life Threads", href: "/threads", status: "live", blurb: "Every unfinished situation, in one place", icon: "Thread", tone: "accent" },
+  { key: "appointments", name: "Appointments", href: "/appointments", status: "live", blurb: "Referrals, bookings and follow-ups", icon: "Stethoscope", tone: "lavender" },
+  { key: "travel", name: "Travel", href: "/travel", status: "live", blurb: "Trips, bookings and packing", icon: "Plane", tone: "champagne" },
+  { key: "home", name: "Home", href: "/home", status: "live", blurb: "Upkeep, insurance and warranties", icon: "House", tone: "lavender" },
+  { key: "finances", name: "Finances", href: "/finances", status: "preview", blurb: "Bills and subscriptions at a glance", icon: "Wallet", tone: "champagne" },
+  { key: "collections", name: "Personal Collections", href: "/collections", status: "preview", blurb: "Gift ideas, books, recipes and more", icon: "Heart", tone: "accent" },
+  { key: "settings", name: "Settings", href: "/settings", status: "live", blurb: "Theme, accounts and demo data", icon: "Settings", tone: "lavender" },
+  { key: "capture", name: "Brain Dump", href: "/capture", status: "live", blurb: "Type or talk, review before anything is added", icon: "Mic", tone: "accent" },
+  { key: "rescue", name: "Email Rescue", href: "/inbox/rescue", status: "live", blurb: "A calm path through a huge unread pile", icon: "Lifebuoy", tone: "lavender" },
 ];

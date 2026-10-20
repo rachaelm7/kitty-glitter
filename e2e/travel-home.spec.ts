@@ -1,13 +1,4 @@
-import { expect, test } from "@playwright/test";
-
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem("kg-test")) {
-      localStorage.clear();
-      sessionStorage.setItem("kg-test", "1");
-    }
-  });
-});
+import { expect, test } from "./helpers";
 
 test("Travel: itinerary, packing and thread link", async ({ page }) => {
   await page.goto("/travel");
@@ -20,9 +11,10 @@ test("Travel: itinerary, packing and thread link", async ({ page }) => {
   await page.getByRole("button", { name: "Add", exact: true }).click();
   await expect(page.getByText("3 of 10 packed")).toBeVisible();
 
-  await page.getByRole("link", { name: "Lisbon trip" }).first().click();
-  await expect(page).toHaveURL(/\/threads#t-lisbon/);
-  await expect(page.locator("#t-lisbon").getByText("Lisbon getaway")).toBeVisible();
+  await page.getByRole("link", { name: "Holiday trip to Lisbon" }).first().click();
+  await expect(page).toHaveURL(/\/threads\/t-lisbon$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Holiday trip to Lisbon" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Lisbon getaway/ })).toBeVisible();
 });
 
 test("Home: maintenance due states, mark done, insurance reminders", async ({ page }) => {

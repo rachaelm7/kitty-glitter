@@ -1,2 +1,2 @@
-export { MoreScreen } from "./components/MoreScreen";
+export { SettingsScreen } from "./components/SettingsScreen";
 export { StatesGallery } from "./components/StatesGallery";

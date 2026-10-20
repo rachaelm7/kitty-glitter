@@ -1,13 +1,4 @@
-import { expect, test } from "@playwright/test";
-
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem("kg-test")) {
-      localStorage.clear();
-      sessionStorage.setItem("kg-test", "1");
-    }
-  });
-});
+import { expect, test } from "./helpers";
 
 test("Appointment Concierge: statuses, timeline, next actions, disclaimer", async ({ page }) => {
   await page.goto("/appointments");
@@ -18,10 +9,10 @@ test("Appointment Concierge: statuses, timeline, next actions, disclaimer", asyn
   }
 
   await page.getByRole("button", { name: /Needs attention/ }).click();
-  await expect(page.getByRole("button", { name: /Dermatology referral/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Skin check \(referral\)/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Dental cleaning/ })).toHaveCount(0);
 
-  await page.getByRole("button", { name: /Dermatology referral/ }).click();
+  await page.getByRole("button", { name: /Skin check \(referral\)/ }).click();
   const sheet = page.getByRole("dialog");
   await expect(sheet.getByText("Where it stands")).toBeVisible();
   await expect(sheet.getByText(/Referral sent by Maple Grove/)).toBeVisible();
@@ -36,5 +27,5 @@ test("Appointment Concierge: statuses, timeline, next actions, disclaimer", asyn
 
   await page.reload();
   await page.getByRole("button", { name: /^Scheduled \d/ }).click();
-  await expect(page.getByRole("button", { name: /Dermatology referral/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Skin check \(referral\)/ })).toBeVisible();
 });
