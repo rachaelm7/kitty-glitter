@@ -6,7 +6,7 @@ import { addDays, formatDay, startOfDay, useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
 import { Button, Card, CheckCircle, EmptyState, PageHeader, Segmented, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
-import { addTask } from "@/modules/tasks";
+import { addTask, type TaskCategory } from "@/modules/tasks";
 import { addThreadNote, createThread, threadStore, type LifeThread } from "@/modules/threads";
 import { parseBrainDump, type Suggestion, type SuggestionKind } from "../data/parse";
 import { draftStore } from "../data/store";
@@ -21,6 +21,16 @@ type Editable = Suggestion & {
 };
 
 const NEW = "__new";
+
+const THREAD_CATEGORY: Record<string, TaskCategory> = {
+  "t-dental": "Health",
+  "t-derm": "Health",
+  "t-car": "Money",
+  "t-house": "Home",
+  "t-return": "Errands",
+  "t-party": "Social",
+  "t-lisbon": "Travel",
+};
 
 function toISO(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -73,7 +83,7 @@ export function CaptureScreen() {
         addThreadNote(threadId!, i.title);
         counts.notes += 1;
       } else {
-        addTask({ title: i.title, kind: i.kind, dueDate: i.dueDate, dueSource: i.dueDate ? i.dueSource : undefined, threadId });
+        addTask({ title: i.title, kind: i.kind, category: (threadId && THREAD_CATEGORY[threadId]) || "Errands", dueDate: i.dueDate, dueSource: i.dueDate ? i.dueSource : undefined, threadId });
         counts[i.kind === "reminder" ? "reminders" : "tasks"] += 1;
       }
     }
@@ -128,7 +138,7 @@ export function CaptureScreen() {
         ) : (
           <ul className="mt-6 space-y-3">
             {items.map((i) => (
-              <li key={i.id} className={cx("rounded-2xl border border-line bg-surface p-4 transition-opacity", !i.include && "opacity-55")}>
+              <li key={i.id} className={cx("rounded-[22px] border border-line/70 bg-surface shadow-soft p-4 transition-opacity", !i.include && "opacity-55")}>
                 <div className="flex items-start gap-3">
                   <CheckCircle checked={i.include} onToggle={() => update(i.id, { include: !i.include })} label={`Include: ${i.title}`} />
                   <div className="min-w-0 flex-1">
@@ -222,7 +232,7 @@ export function CaptureScreen() {
         id="dump"
         value={draft}
         onChange={(e) => draftStore.set(e.target.value)}
-        placeholder={"Whatever's on your mind…\ne.g. Call the clinic by Friday. Remind me to find my passport."}
+        placeholder={"Whatever's on your mind…\ne.g. I need to schedule my dentist appointment, order cat food, and check on the insurance renewal."}
         className="mt-5 min-h-56 w-full resize-y rounded-3xl border-[1.5px] border-line bg-surface p-4 text-[17px] leading-relaxed"
       />
       <div className="mt-3 flex flex-wrap gap-2">

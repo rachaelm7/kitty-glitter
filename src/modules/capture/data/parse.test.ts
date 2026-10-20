@@ -16,6 +16,13 @@ describe("splitThoughts", () => {
       "renew my passport",
     ]);
   });
+  it("splits a comma list of actions", () => {
+    expect(splitThoughts("I need to schedule my dentist appointment, order cat food, and check on the insurance renewal.")).toEqual([
+      "I need to schedule my dentist appointment",
+      "order cat food",
+      "check on the insurance renewal.",
+    ]);
+  });
   it("does not split ordinary 'and'", () => {
     expect(splitThoughts("pick up milk and eggs")).toEqual(["pick up milk and eggs"]);
   });
@@ -56,5 +63,21 @@ describe("parseBrainDump", () => {
     expect(out[1].due).toBeUndefined();
     expect(out[2]).toMatchObject({ kind: "note", timeHint: "next week", threadId: "t-lisbon" });
     expect(out[2].due).toBeUndefined();
+  });
+});
+
+describe("the approved example", () => {
+  it("turns one messy thought into three tasks with no dates", () => {
+    const out = parseBrainDump(
+      "I need to schedule my dentist appointment, order cat food, and check on the insurance renewal.",
+      now,
+      [{ id: "t-dental", keywords: ["dentist"] }, ...threads],
+    );
+    expect(out.map((s) => [s.kind, s.title, s.threadId])).toEqual([
+      ["task", "Schedule my dentist appointment", "t-dental"],
+      ["task", "Order cat food", undefined],
+      ["task", "Check on the insurance renewal", "t-car"],
+    ]);
+    expect(out.every((s) => s.due === undefined)).toBe(true);
   });
 });

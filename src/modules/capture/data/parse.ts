@@ -22,9 +22,11 @@ const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 const NUMBERS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, ten: 10, a: 1 };
 
+const ACTION_VERB =
+  "call|email|text|book|buy|pay|schedule|renew|pick up|order|fix|clean|pack|reply|confirm|cancel|return|send|make|find|ask|check|look into|sign up|register|print|drop off|get|update|submit|research|plan|write|water|feed|wash";
+
 const REMINDER = /\b(remind me|don'?t forget|remember to|reminder)\b/i;
-const TASK_START =
-  /^(call|email|text|book|buy|pay|schedule|renew|pick up|order|fix|clean|pack|reply|confirm|cancel|return|send|make|find|ask|check|look into|sign up|register|print|drop off|get|update|submit|research|plan|write)\b/i;
+const TASK_START = new RegExp(`^(?:${ACTION_VERB})\\b`, "i");
 const TASK_ANY = /\b(need to|needs to|have to|has to|gotta|got to|should|must|to-?do)\b/i;
 
 const LEAD_FILLERS =
@@ -33,10 +35,14 @@ const LEAD_INTENT =
   /^(?:i\s+)?(?:really\s+)?(?:need to|needs to|have to|gotta|got to|should|must|want to|wanna|'ve got to|remind me to|don'?t forget to|remember to|don'?t let me forget to)\s+/i;
 const VAGUE = /\b(next week|this weekend|next weekend|soon|sometime|someday|end of (?:the )?(?:month|week)|later this (?:week|month)|before the trip)\b/i;
 
+// "Schedule X, order Y, and check Z" → three thoughts (only when each part starts with an action verb).
+const LIST_SPLIT = new RegExp(`,\\s*(?:and\\s+)?(?=(?:${ACTION_VERB})\\b)`, "i");
+
 export function splitThoughts(text: string): string[] {
   return text
     .split(/\n+|(?<=[.!?])\s+|;\s*|,?\s+(?:and also|oh and|and then|also)\s+/i)
-    .map((s) => s.trim().replace(/^[-•*]\s*/, "").replace(/^(?:and also|oh and|and then|also)\s+/i, ""))
+    .flatMap((s) => s.split(LIST_SPLIT))
+    .map((s) => s.trim().replace(/^[-•*]\s*/, "").replace(/^(?:and also|oh and|and then|also|and)\s+/i, ""))
     .filter((s) => s.replace(/[^a-z]/gi, "").length >= 4);
 }
 
