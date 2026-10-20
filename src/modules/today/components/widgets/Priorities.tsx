@@ -44,7 +44,7 @@ export function PrioritiesWidget() {
               key={n.id}
               className={cx(
                 "flex items-start gap-3 rounded-[22px] border p-3.5 transition-[background-color,opacity] duration-300",
-                checked ? "border-line bg-transparent opacity-60" : "border-urgent/25 bg-urgent-soft",
+                checked ? "border-line bg-transparent" : "border-urgent/25 bg-urgent-soft",
               )}
             >
               <CheckCircle
@@ -57,7 +57,7 @@ export function PrioritiesWidget() {
                 <p className={cx("text-[13px] font-semibold", checked ? "text-muted" : "text-urgent")}>
                   {i + 1}. {n.when}
                 </p>
-                <p className={cx("font-semibold", checked && "line-through")}>{n.title}</p>
+                <p className={cx("font-semibold", checked && "text-muted line-through")}>{n.title}</p>
                 <p className="text-sm text-muted">{n.who}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   <button

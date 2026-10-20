@@ -41,7 +41,7 @@ export function MoreScreen() {
       <PageHeader title="More" subtitle="Everything else Kitty Glitter keeps an eye on." />
       <ul className="mt-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
         {primary.map((m, i) => (
-          <li key={m.key} className="animate-rise" style={{ animationDelay: `${i * 40}ms` }}>
+          <li key={m.key} className="min-w-0 animate-rise" style={{ animationDelay: `${i * 40}ms` }}>
             <ModuleCard m={m} preview={preview[m.key]} />
           </li>
         ))}
@@ -52,8 +52,8 @@ export function MoreScreen() {
         {extras.map((m) => {
           const I = Icon[m.icon];
           return (
-            <li key={m.key}>
-              <Link href={m.href!} className="flex min-h-16 items-center gap-3 rounded-[22px] border border-line/70 bg-surface p-3.5 shadow-soft transition-shadow hover:shadow-lift">
+            <li key={m.key} className="min-w-0">
+              <Link href={m.href!} className="flex min-h-16 min-w-0 items-center gap-3 rounded-[22px] border border-line/70 bg-surface p-3.5 shadow-soft transition-shadow hover:shadow-lift">
                 <span className={cx("grid size-10 flex-none place-items-center rounded-xl", TONE[m.tone])}>
                   <I />
                 </span>

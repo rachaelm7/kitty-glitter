@@ -138,7 +138,7 @@ export function CaptureScreen() {
         ) : (
           <ul className="mt-6 space-y-3">
             {items.map((i) => (
-              <li key={i.id} className={cx("rounded-[22px] border border-line/70 bg-surface shadow-soft p-4 transition-opacity", !i.include && "opacity-55")}>
+              <li key={i.id} className={cx("rounded-[22px] border border-line/70 p-4 transition-colors", i.include ? "bg-surface shadow-soft" : "bg-surface-2")}>
                 <div className="flex items-start gap-3">
                   <CheckCircle checked={i.include} onToggle={() => update(i.id, { include: !i.include })} label={`Include: ${i.title}`} />
                   <div className="min-w-0 flex-1">

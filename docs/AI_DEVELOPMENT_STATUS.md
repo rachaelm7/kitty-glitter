@@ -53,6 +53,10 @@ One PR to `main` that contains everything (it builds on #1–#7, so merging it a
   - axe WCAG 2.1 A/AA on 16 screens in light and dark
 - Screenshots reviewed at 375px and 1280px in light and dark mode.
 
+### Fixed after the first CI run
+- **More overflowed on iPhone:** the "Also here" rows were 20px wider than the screen, so the page zoomed out and the tab bar became hard to tap. Fixed, and the no-horizontal-scroll test now measures the real device width: the old check compared against `innerWidth`, which grows with the overflow, so it couldn't catch this.
+- **Past agenda items and completed tasks failed contrast** (they were faded with opacity). They now use the muted text colour. This only showed up after mid-morning, which is why the first runs passed.
+
 ### Next three highest-value improvements
 1. **Swipe actions on Inbox rows** (archive / mark read) with haptic-style feedback on iPhone, plus keyboard shortcuts on desktop.
 2. **Recurring tasks and reminders** (for example "every 90 days" for the furnace filter), shared with Home upkeep so Mark done in one place updates the other.

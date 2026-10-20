@@ -144,13 +144,13 @@ function TaskRow({ t, now, onToggle, onOpen, onOpenEmail }: { t: Task; now: Date
   const off = dueOffset(t, now);
   const done = t.status === "done";
   return (
-    <li className={cx("flex items-start gap-3 border-b border-line px-4 py-3 last:border-b-0", done && "opacity-60")}>
+    <li className="flex items-start gap-3 border-b border-line px-4 py-3 last:border-b-0">
       <span className="pt-0.5">
         <CheckCircle checked={done} onToggle={onToggle} label={`${done ? "Mark not done" : "Mark done"}: ${t.title}`} />
       </span>
       <div className="min-w-0 flex-1">
         <button type="button" onClick={onOpen} className="block w-full text-left">
-          <span className={cx("block font-medium break-words", done && "line-through")}>{t.title}</span>
+          <span className={cx("block font-medium break-words", done && "text-muted line-through")}>{t.title}</span>
           {t.status === "waiting" && <span className="mt-0.5 block text-sm text-lavender">Waiting on {t.waitingOn}</span>}
           {t.notes && <span className="mt-0.5 block truncate text-sm text-muted">{t.notes}</span>}
         </button>

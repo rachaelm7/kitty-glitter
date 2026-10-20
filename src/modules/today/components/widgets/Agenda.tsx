@@ -20,11 +20,12 @@ export function AgendaWidget() {
             <li
               key={a.id}
               aria-current={i === current ? "time" : undefined}
-              className={cx("grid grid-cols-[76px_1fr] gap-2 border-b border-line py-3 last:border-b-0", i < current && "opacity-50")}
+              className="grid grid-cols-[76px_1fr] gap-2 border-b border-line py-3 last:border-b-0"
             >
               <span className={cx("pt-px text-sm", i === current ? "font-bold text-accent" : "text-muted")}>{formatTime(a.hour, a.minute)}</span>
               <span>
-                <b className="font-semibold">{a.title}</b>
+                <b className={cx("font-semibold", i < current && "font-normal text-muted")}>{a.title}</b>
+                {i < current && <span className="sr-only"> (earlier today)</span>}
                 {a.where && <span className="block text-sm text-muted">{a.where}</span>}
               </span>
             </li>

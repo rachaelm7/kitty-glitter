@@ -15,9 +15,21 @@ export const test = base.extend({
 
 export { expect };
 
+/**
+ * Content must fit the device width. Compare against clientWidth (the device
+ * width), not innerWidth: on mobile, innerWidth grows to match overflowing
+ * content and the browser zooms out, which would hide the problem.
+ */
 export async function noHorizontalScroll(page: Page) {
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(overflow).toBeLessThanOrEqual(1);
+  const { overflow, offenders } = await page.evaluate(() => {
+    const width = document.documentElement.clientWidth;
+    const offenders = [...document.querySelectorAll("body *")]
+      .filter((el) => el.getBoundingClientRect().right > width + 1)
+      .slice(0, 3)
+      .map((el) => `${el.tagName.toLowerCase()}.${String((el as HTMLElement).className).slice(0, 50)}`);
+    return { overflow: document.documentElement.scrollWidth - width, offenders };
+  });
+  expect(overflow, `wider than the screen: ${offenders.join(" | ")}`).toBeLessThanOrEqual(1);
 }
 
 export async function expectDemoNotice(page: Page) {
