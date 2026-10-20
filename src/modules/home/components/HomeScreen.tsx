@@ -35,7 +35,7 @@ export function HomeScreen() {
               return (
                 <li
                   key={m.id}
-                  className={cx("rounded-2xl border border-line bg-surface p-4", due.state === "overdue" && "border-l-4 border-l-urgent")}
+                  className={cx("rounded-[22px] border border-line/70 bg-surface shadow-soft p-4", due.state === "overdue" && "border-l-4 border-l-urgent")}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -112,8 +112,8 @@ export function HomeScreen() {
                 <ul>
                   {tasks.map((t) => (
                     <li key={t.id} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
-                      <CheckCircle checked={t.done} onToggle={() => toggleTask(t.id)} label={`Done: ${t.title}`} />
-                      <span className={cx(t.done && "text-muted line-through")}>{t.title}</span>
+                      <CheckCircle checked={(t.status === "done")} onToggle={() => toggleTask(t.id)} label={`Done: ${t.title}`} />
+                      <span className={cx((t.status === "done") && "text-muted line-through")}>{t.title}</span>
                     </li>
                   ))}
                 </ul>

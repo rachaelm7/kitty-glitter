@@ -56,7 +56,7 @@ export function TravelScreen() {
       {tripReminders(trip).length > 0 && (
         <ul className="mt-4 space-y-2">
           {tripReminders(trip).map((r) => (
-            <li key={r} className="flex items-start gap-2 rounded-2xl border border-line bg-surface p-3 text-sm">
+            <li key={r} className="flex items-start gap-2 rounded-[22px] border border-line/70 bg-surface shadow-soft p-3 text-sm">
               <Icon.Sparkle width={18} height={18} className="mt-0.5 flex-none text-accent" /> {r}
             </li>
           ))}
@@ -150,8 +150,8 @@ export function TravelScreen() {
                 <ul>
                   {related.map((t) => (
                     <li key={t.id} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
-                      <CheckCircle checked={t.done} onToggle={() => toggleTask(t.id)} label={`Done: ${t.title}`} />
-                      <span className={cx(t.done && "text-muted line-through")}>{t.title}</span>
+                      <CheckCircle checked={(t.status === "done")} onToggle={() => toggleTask(t.id)} label={`Done: ${t.title}`} />
+                      <span className={cx((t.status === "done") && "text-muted line-through")}>{t.title}</span>
                     </li>
                   ))}
                 </ul>

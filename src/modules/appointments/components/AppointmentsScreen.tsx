@@ -63,7 +63,7 @@ export function AppointmentsScreen() {
                   type="button"
                   onClick={() => setOpenId(a.id)}
                   className={cx(
-                    "flex h-full w-full flex-col gap-2.5 rounded-2xl border border-line bg-surface p-4 text-left transition-colors hover:bg-surface-2/60",
+                    "flex h-full w-full flex-col gap-2.5 rounded-[22px] border border-line/70 bg-surface shadow-soft p-4 text-left transition-colors hover:bg-surface-2/60",
                     flag && "border-l-4 border-l-urgent",
                   )}
                 >

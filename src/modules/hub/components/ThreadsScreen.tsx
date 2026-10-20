@@ -1,164 +1,105 @@
 "use client";
 
 import Link from "next/link";
-import { useNow, untilLabel } from "@/core/date";
+import { useState } from "react";
 import { useStore } from "@/core/store/createStore";
-import { Card, EmptyState, PageHeader, Tag } from "@/core/ui/primitives";
+import { Chip, EmptyState, PageHeader } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
-import { STATUS_LABEL, appointmentStore } from "@/modules/appointments";
-import { RENEWALS } from "@/modules/bills";
-import { coverage, maintenanceStore, nextDue } from "@/modules/home";
-import { packingProgress, tripStore } from "@/modules/travel";
-import { emailProvider } from "@/modules/email";
-import { sortTasks, taskStore } from "@/modules/tasks";
-import { threadNoteStore, threadStore } from "@/modules/threads";
+import { threadStore, type ThreadStage } from "@/modules/threads";
+import { buildThreadView } from "../data/threadView";
+import { StagePill, STAGE_LABEL } from "./StagePill";
+import { useThreadSources } from "./useThreadSources";
 
-/** Life Threads: everything related to one part of life, gathered from every module. */
+const ORDER: ThreadStage[] = ["action", "waiting", "scheduled", "done"];
+
+/** Life Threads: every unfinished situation, with what's next and who you're waiting on. */
 export function ThreadsScreen() {
-  useNow();
   const threads = useStore(threadStore);
-  const tasks = sortTasks(useStore(taskStore));
-  const notes = useStore(threadNoteStore);
-  const messages = emailProvider.listMessages();
-  const appts = useStore(appointmentStore);
-  const trips = useStore(tripStore);
-  const upkeep = useStore(maintenanceStore);
+  const src = useThreadSources();
+  const [stage, setStage] = useState<ThreadStage | "all">("all");
+  const shown = threads.filter((t) => stage === "all" || t.stage === stage).sort((a, b) => ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
 
   return (
     <div>
-      <PageHeader title="Life Threads" subtitle="Related tasks, emails, notes and dates, gathered in one place." />
-      {threads.length === 0 ? (
-        <div className="mt-6">
-          <EmptyState title="No threads yet" icon={<Icon.Thread />}>
-            Create one from a brain dump.
+      <PageHeader title="Life Threads" subtitle="Each unfinished situation in one place: what happened, what's next, and who you're waiting on." />
+      <div role="group" aria-label="Filter threads" className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
+        <Chip pressed={stage === "all"} onClick={() => setStage("all")}>
+          All <span className="text-muted">{threads.length}</span>
+        </Chip>
+        {ORDER.map((s) => (
+          <Chip key={s} pressed={stage === s} onClick={() => setStage(s)}>
+            {STAGE_LABEL[s]} <span className="text-muted">{threads.filter((t) => t.stage === s).length}</span>
+          </Chip>
+        ))}
+      </div>
+
+      {shown.length === 0 ? (
+        <div className="mt-5">
+          <EmptyState title="No threads here" icon={<Icon.Thread />}>
+            Start one from a brain dump, or check another filter.
           </EmptyState>
         </div>
       ) : (
-        <ul className="mt-6 grid gap-4 lg:grid-cols-2">
-          {threads.map((t) => {
-            const tTasks = tasks.filter((k) => k.threadId === t.id);
-            const tMail = messages.filter((m) => m.threadId === t.id);
-            const tDates = RENEWALS.filter((r) => r.threadId === t.id);
-            const tNotes = notes.filter((n) => n.threadId === t.id);
-            const tAppts = appts.filter((a) => a.threadId === t.id);
-            const tTrips = trips.filter((x) => x.threadId === t.id);
-            const tUpkeep = upkeep.filter((m) => m.threadId === t.id);
-            const tCover = coverage.filter((c) => c.threadId === t.id);
-            const empty = !tTasks.length && !tMail.length && !tDates.length && !tNotes.length && !tAppts.length && !tTrips.length && !tUpkeep.length && !tCover.length;
+        <ul className="mt-4 grid gap-3.5 lg:grid-cols-2">
+          {shown.map((t, i) => {
+            const v = buildThreadView(t, src);
+            const I = Icon[t.icon];
             return (
-              <li key={t.id} id={t.id} className="scroll-mt-6 target:[&>div]:ring-2 target:[&>div]:ring-accent">
-                <Card className="h-full">
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid size-9 place-items-center rounded-xl" style={{ background: `${t.color}22`, color: t.color }}>
-                      <Icon.Thread width={20} height={20} />
+              <li key={t.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
+                <Link
+                  href={`/threads/${t.id}`}
+                  className="flex h-full flex-col gap-3 rounded-[22px] border border-line/70 bg-surface p-4 shadow-soft transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-lift"
+                >
+                  <span className="flex items-start gap-3">
+                    <span className="grid size-11 flex-none place-items-center rounded-2xl" style={{ background: `${t.color}1f`, color: t.color }}>
+                      <I width={22} height={22} />
                     </span>
-                    <div className="min-w-0">
-                      <h2 className="text-lg leading-tight">{t.name}</h2>
-                      <p className="truncate text-sm text-muted">{t.blurb}</p>
-                    </div>
-                  </div>
-                  {empty && <p className="mt-3 text-sm text-muted">Nothing linked yet.</p>}
-                  {tTasks.length > 0 && (
-                    <Group label="Tasks">
-                      {tTasks.map((k) => (
-                        <li key={k.id} className={k.done ? "text-muted line-through" : ""}>
-                          {k.title} {k.kind === "reminder" && <Tag tone="neutral">Reminder</Tag>}
-                        </li>
-                      ))}
-                    </Group>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-start justify-between gap-2">
+                        <b className="font-display text-lg leading-tight font-semibold">{t.name}</b>
+                        <StagePill stage={t.stage} />
+                      </span>
+                      <span className="mt-0.5 block text-sm text-muted">{t.status}</span>
+                    </span>
+                  </span>
+                  {t.next && t.stage !== "done" && (
+                    <span className="rounded-2xl bg-surface-2 px-3 py-2 text-sm">
+                      <b className="font-semibold">Next:</b> {t.next.label}
+                    </span>
                   )}
-                  {tTrips.length > 0 && (
-                    <Group label="Trips">
-                      {tTrips.map((x) => (
-                        <li key={x.id}>
-                          <Link href="/travel" className="hover:underline">
-                            {x.name}
-                          </Link>{" "}
-                          <Tag tone="neutral">leaves {untilLabel(x.startOffset)}</Tag>{" "}
-                          <span className="text-muted">· {x.reservations.length} bookings · {packingProgress(x.packing).pct}% packed</span>
-                        </li>
-                      ))}
-                    </Group>
+                  {t.waitingOn && t.stage !== "done" && (
+                    <span className="flex items-center gap-1.5 text-sm text-lavender">
+                      <Icon.Clock width={16} height={16} /> Waiting on {t.waitingOn}
+                    </span>
                   )}
-                  {(tUpkeep.length > 0 || tCover.length > 0) && (
-                    <Group label="Home & coverage">
-                      {tUpkeep.map((m) => (
-                        <li key={m.id}>
-                          <Link href="/home" className="hover:underline">
-                            {m.title}
-                          </Link>{" "}
-                          <Tag tone={nextDue(m).state === "overdue" ? "urgent" : "neutral"}>
-                            {nextDue(m).offset < 0 ? `${-nextDue(m).offset}d late` : `due ${untilLabel(nextDue(m).offset)}`}
-                          </Tag>
-                        </li>
-                      ))}
-                      {tCover.map((c) => (
-                        <li key={c.id}>
-                          <Link href="/home" className="hover:underline">
-                            {c.title}
-                          </Link>{" "}
-                          <Tag tone="neutral">{c.kind === "insurance" ? "renews" : "ends"} {untilLabel(c.endsOffset)}</Tag>
-                        </li>
-                      ))}
-                    </Group>
-                  )}
-                  {tAppts.length > 0 && (
-                    <Group label="Appointments">
-                      {tAppts.map((a) => (
-                        <li key={a.id}>
-                          <Link href="/appointments" className="hover:underline">
-                            {a.title}
-                          </Link>{" "}
-                          <Tag tone="neutral">{STATUS_LABEL[a.status]}</Tag>
-                        </li>
-                      ))}
-                    </Group>
-                  )}
-                  {tMail.length > 0 && (
-                    <Group label="Email">
-                      {tMail.map((m) => (
-                        <li key={m.id}>
-                          <Link href="/inbox" className="hover:underline">
-                            {m.subject}
-                          </Link>{" "}
-                          <span className="text-muted">· {m.from}</span>
-                        </li>
-                      ))}
-                    </Group>
-                  )}
-                  {tDates.length > 0 && (
-                    <Group label="Dates">
-                      {tDates.map((r) => (
-                        <li key={r.id}>
-                          {r.title} <Tag tone="neutral">{untilLabel(r.dayOffset)}</Tag>
-                        </li>
-                      ))}
-                    </Group>
-                  )}
-                  {tNotes.length > 0 && (
-                    <Group label="Notes">
-                      {tNotes.map((n) => (
-                        <li key={n.id} className="italic">
-                          “{n.text}”
-                        </li>
-                      ))}
-                    </Group>
-                  )}
-                </Card>
+                  <span className="mt-auto flex flex-wrap gap-3 text-xs text-muted">
+                    {v.emails.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Icon.Mail width={14} height={14} /> {v.emails.length} email{v.emails.length > 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {v.tasks.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Icon.Tasks width={14} height={14} /> {v.openTasks} open task{v.openTasks === 1 ? "" : "s"}
+                      </span>
+                    )}
+                    {v.appointments.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Icon.Calendar width={14} height={14} /> {v.appointments.length} appointment{v.appointments.length > 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {v.upcoming.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Icon.Clock width={14} height={14} /> {v.upcoming.length} coming up
+                      </span>
+                    )}
+                  </span>
+                </Link>
               </li>
             );
           })}
         </ul>
       )}
-    </div>
-  );
-}
-
-function Group({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mt-4">
-      <p className="text-xs font-bold tracking-wide text-muted uppercase">{label}</p>
-      <ul className="mt-1.5 space-y-1.5 text-[15px]">{children}</ul>
     </div>
   );
 }
