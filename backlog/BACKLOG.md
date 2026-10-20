@@ -17,7 +17,7 @@ Status: `idea` · `ready` · `in progress` · `done`
 | 8 | Supabase login locked to owner email | 2 | idea | |
 | 9 | Gmail read-only OAuth (one account) | 3 | idea | |
 | 10 | Brain Dump / Quick Capture | 1b | in review | Review before adding; no invented dates |
-| 11 | Appointment Concierge | 1b | ready | Not medical advice |
+| 11 | Appointment Concierge | 1b | in review | Not medical advice |
 | 12 | Email Rescue Mode | 1b | ready | Important-email protection |
 | 13 | Travel & Home dashboards + Life Threads | 1b | ready | |
 | 14 | UI/UX polish: widgets, states, motion | 1b | ready | Reduced motion, contrast |

@@ -15,9 +15,31 @@ PRs are stacked because each builds on the last. Merge them in order; GitHub ret
 |---|---|---|---|---|
 | 1 | `claude/life-hub-phase-1-27ixfq` | `main` | Docs, prototype, Claude GitHub Actions | PR #1 open |
 | 2 | `claude/app-foundation` | #1 | Next.js PWA: Today, Inbox, Cleanup, Tasks, More | PR #2 open |
-| 3 | `claude/brain-dump` | #2 | Brain Dump, Life Threads | PR open |
+| 3 | `claude/brain-dump` | #2 | Brain Dump, Life Threads | PR #3 open |
+| 4 | `claude/appointment-concierge` | #3 | Appointment Concierge | PR open |
 
 ## Increments
+
+### Priority 2: Appointment Concierge
+**Branch:** `claude/appointment-concierge`
+
+Built
+- **Appointments** (`/appointments`): six fictional referrals, visits and tests, one in each status: Needs Scheduling, Scheduled, Waiting on Office, Results Pending, Follow-Up Needed and Completed.
+- Filter chips with counts, plus **Needs attention**. Cards show a six-step progress bar and the next step.
+- **Detail sheet:** a vertical status stepper, suggested next steps, a dated event timeline, **Update status** (your own tracker only; the change is logged in the timeline), and an editable draft to the office with Copy (**Send disabled**).
+- **Next steps are rules about scheduling and paperwork only** (call to book, follow up after five quiet days, ask how results are shared, book the follow-up). They never comment on symptoms, results or treatment.
+- **"Fictional demo. Not medical advice."** appears on the screen and in every sheet. Providers are made up, and phone numbers use the reserved fictional 555-01xx range.
+- Appointments appear in the **Health appointments** Life Thread.
+- Urgency is kept calm: rose is used only for the items that really need attention, as a left border and label.
+
+Tests
+- Unit: 5 tests (attention rules, completed has no actions, all six statuses covered, **no clinical wording in any suggestion or draft for any status**, fictional phone numbers only).
+- End-to-end: statuses, filter, sheet, disclaimer, disabled Send, a status update that persists across reload, at both sizes.
+
+Known gaps
+- You can't add or edit appointments yet. Status changes are the only edits.
+- Not yet shown on Today; planned as a Today widget in Priority 5.
+
 
 ### Priority 1: Brain Dump / Quick Capture, and Life Threads
 **Branch:** `claude/brain-dump`
@@ -70,7 +92,7 @@ Known gaps
 | Priority | Feature | State |
 |---|---|---|
 | 1 | Brain Dump / Quick Capture | Built, in review (PR from `claude/brain-dump`) |
-| 2 | Appointment Concierge | Not started |
+| 2 | Appointment Concierge | Built, in review (PR from `claude/appointment-concierge`) |
 | 3 | Email Rescue Mode | Not started |
 | 4 | Travel & Home with Life Threads | Not started |
 | 5 | UI/UX polish (widgets, states, motion) | Not started |

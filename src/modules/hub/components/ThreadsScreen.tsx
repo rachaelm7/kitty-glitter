@@ -5,6 +5,7 @@ import { useNow, untilLabel } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
 import { Card, EmptyState, PageHeader, Tag } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
+import { STATUS_LABEL, appointmentStore } from "@/modules/appointments";
 import { RENEWALS } from "@/modules/bills";
 import { emailProvider } from "@/modules/email";
 import { sortTasks, taskStore } from "@/modules/tasks";
@@ -17,6 +18,7 @@ export function ThreadsScreen() {
   const tasks = sortTasks(useStore(taskStore));
   const notes = useStore(threadNoteStore);
   const messages = emailProvider.listMessages();
+  const appts = useStore(appointmentStore);
 
   return (
     <div>
@@ -34,7 +36,8 @@ export function ThreadsScreen() {
             const tMail = messages.filter((m) => m.threadId === t.id);
             const tDates = RENEWALS.filter((r) => r.threadId === t.id);
             const tNotes = notes.filter((n) => n.threadId === t.id);
-            const empty = !tTasks.length && !tMail.length && !tDates.length && !tNotes.length;
+            const tAppts = appts.filter((a) => a.threadId === t.id);
+            const empty = !tTasks.length && !tMail.length && !tDates.length && !tNotes.length && !tAppts.length;
             return (
               <li key={t.id} id={t.id} className="scroll-mt-6 target:[&>div]:ring-2 target:[&>div]:ring-accent">
                 <Card className="h-full">
@@ -53,6 +56,18 @@ export function ThreadsScreen() {
                       {tTasks.map((k) => (
                         <li key={k.id} className={k.done ? "text-muted line-through" : ""}>
                           {k.title} {k.kind === "reminder" && <Tag tone="neutral">Reminder</Tag>}
+                        </li>
+                      ))}
+                    </Group>
+                  )}
+                  {tAppts.length > 0 && (
+                    <Group label="Appointments">
+                      {tAppts.map((a) => (
+                        <li key={a.id}>
+                          <Link href="/appointments" className="hover:underline">
+                            {a.title}
+                          </Link>{" "}
+                          <Tag tone="neutral">{STATUS_LABEL[a.status]}</Tag>
                         </li>
                       ))}
                     </Group>
