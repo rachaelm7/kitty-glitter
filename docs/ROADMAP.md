@@ -3,7 +3,8 @@
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Clickable single-file prototype (`prototype/life-hub-demo.html`) | **Done** |
-| 1 | Port prototype to Next.js PWA on sample data: setup, PWA, themes, tab nav, Today, Inbox, Cleanup flow, Tasks, More | **Planned, awaiting Rachael's OK** |
+| 1 | Port prototype to Next.js PWA on sample data: setup, PWA, themes, tab nav, Today, Inbox, Cleanup flow, Tasks, More | **Built, in review** (not deployed) |
+| 1b | Secondary queue: Brain Dump, Appointment Concierge, Email Rescue, Travel & Home, polish (fictional data) | In progress, see `AI_DEVELOPMENT_STATUS.md` |
 | 2 | Supabase login locked to Rachael's email | Not started |
 | 3 | Connect one Gmail account, read-only OAuth (secrets in a backend route) | Not started |
 | 4 | Rules-based cleanup | Not started |

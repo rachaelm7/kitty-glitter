@@ -23,11 +23,12 @@ Read this first in every session. Then read `docs/PROJECT_BRIEF.md` and any brie
 1. Pick up the task: a GitHub issue labeled `claude-ready` (see `docs/AUTOMATION.md`), the oldest brief in `instructions/inbox/`, or a task Rachael gives directly.
 2. For anything non-trivial, post a short plan and wait for OK, unless the brief says pre-approved. A `claude-ready` label counts as pre-approval to build and open a draft PR; it is not approval to merge.
 3. Implement on the session's feature branch with small, clear commits.
-4. Run lint, typecheck and build before pushing.
-5. Move the brief to `instructions/done/` with an **Outcome** section filled in, and update `backlog/BACKLOG.md` and `docs/ROADMAP.md`.
+4. Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` and `npx playwright test` before pushing.
+5. Move the brief to `instructions/done/` with an **Outcome** section filled in, and update `backlog/BACKLOG.md`, `docs/ROADMAP.md` and `docs/AI_DEVELOPMENT_STATUS.md`. Never claim an external (ChatGPT) review that did not happen.
 6. Never open a PR or merge unless asked.
 
 ## Conventions
 - Next.js App Router + TypeScript + Tailwind. Mobile-first, respect iPhone safe areas.
 - Data goes through provider interfaces (`modules/<name>/data/provider.ts`), with mocks swappable for real sources.
 - Record notable decisions in `docs/decisions/NNNN-title.md`.
+- Store and hook files need `"use client"`; see `docs/ARCHITECTURE.md` → Conventions. Read `AGENTS.md` before using Next.js APIs.

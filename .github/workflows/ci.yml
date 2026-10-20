@@ -33,12 +33,19 @@ jobs:
         if: steps.app.outputs.present == 'true'
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
-      - name: Lint, typecheck, build
+      - name: Lint, typecheck, unit tests, build
         if: steps.app.outputs.present == 'true'
         run: |
           npm run --if-present lint
           npm run --if-present typecheck
+          npm run --if-present test
           npm run --if-present build
+
+      - name: End-to-end tests (iPhone and desktop sizes)
+        if: steps.app.outputs.present == 'true' && hashFiles('playwright.config.ts') != ''
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test
 
       - name: Scan for secrets
         uses: gitleaks/gitleaks-action@v2
