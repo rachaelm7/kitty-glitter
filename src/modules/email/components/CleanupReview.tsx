@@ -53,7 +53,7 @@ export function CleanupReview() {
         </div>
       ) : (
         <>
-          <ul className="mt-6 divide-y divide-line rounded-2xl border border-line bg-surface px-4">
+          <ul className="mt-6 divide-y divide-line rounded-[22px] border border-line/70 bg-surface shadow-soft px-4">
             {proposals.map((p) => {
               const s = senders.find((x) => x.id === p.senderId)!;
               return (

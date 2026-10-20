@@ -22,7 +22,7 @@ export function CleanupChooser() {
       <p className="text-sm text-muted">
         Newsletters and promotions you rarely open. Pick an action for each sender. Nothing happens until you review and confirm.
       </p>
-      <ul className="mt-3 divide-y divide-line rounded-2xl border border-line bg-surface px-4">
+      <ul className="mt-3 divide-y divide-line rounded-[22px] border border-line/70 bg-surface shadow-soft px-4">
         {senders.map((s) => {
           const current = choices[s.id];
           return (

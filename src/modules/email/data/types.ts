@@ -3,13 +3,13 @@ export type AccountId = "personal" | "hobby" | "work" | "home" | "legacy";
 export type Account = {
   id: AccountId;
   name: string;
-  address: string; // fictional, uses reserved example.* domains
+  address: string; // fictional, always @example.com
   color: string;
   unread: number;
   connected: boolean;
 };
 
-export type Category = "bill" | "appointment" | "renewal" | "work" | "order" | "security" | "personal" | "newsletter" | "promo" | "receipt";
+export type Category = "bill" | "appointment" | "renewal" | "work" | "service" | "security" | "personal" | "newsletter" | "promo" | "receipt";
 
 export type Message = {
   id: string;
@@ -24,10 +24,14 @@ export type Message = {
   needsAction: boolean;
   /** Short imperative used on Today, e.g. "Confirm Thursday's appointment". */
   actionTitle?: string;
+  /** How the morning brief mentions it, e.g. "your dental appointment needs confirmation". */
+  briefLine?: string;
   urgent: boolean;
   unread: boolean;
   /** Simulated AI output. In later phases this comes from a backend route. */
   summary: string;
+  /** Why it was sorted this way (simulated AI categorization, shown to the user). */
+  why: string;
   deadline?: { label: string; dayOffset?: number };
   suggestedReply?: string;
   threadId?: string;

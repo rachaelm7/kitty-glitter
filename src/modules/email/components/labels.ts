@@ -5,7 +5,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   appointment: "Appointment",
   renewal: "Renewal",
   work: "Work",
-  order: "Order",
+  service: "Home service",
   security: "Security",
   personal: "Personal",
   newsletter: "Newsletter",

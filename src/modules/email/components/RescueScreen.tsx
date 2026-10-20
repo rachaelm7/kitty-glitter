@@ -60,7 +60,7 @@ export function RescueScreen() {
               const msgs = piles[p.id];
               const top = senderCounts(msgs).slice(0, 3);
               return (
-                <li key={p.id} className="rounded-2xl border border-line bg-surface p-4">
+                <li key={p.id} className="rounded-[22px] border border-line/70 bg-surface shadow-soft p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h2 className="text-lg leading-tight">
