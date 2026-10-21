@@ -11,6 +11,7 @@ import { Icon } from "@/core/ui/icons";
 import { useToast } from "@/core/ui/Toast";
 import { threadStore } from "@/modules/threads";
 import { dueOffset, toISODate } from "../data/logic";
+import { REPEAT_OPTIONS } from "../data/recur";
 import { addTask, removeTask, updateTask } from "../data/store";
 import { CATEGORIES, type Task, type TaskCategory, type TaskStatus } from "../data/types";
 
@@ -39,6 +40,7 @@ function TaskForm({ mode, onDone }: { mode: Mode; onDone: () => void }) {
   const [waitingOn, setWaitingOn] = useState(t?.waitingOn ?? "");
   const [due, setDue] = useState(initialDue !== undefined ? toISODate(addDays(now, initialDue)) : "");
   const [threadId, setThreadId] = useState(t?.threadId ?? "");
+  const [repeat, setRepeat] = useState(t?.repeatEveryDays ? String(t.repeatEveryDays) : "");
   const [touched, setTouched] = useState(false);
   const titleError = touched && !title.trim();
 
@@ -53,6 +55,7 @@ function TaskForm({ mode, onDone }: { mode: Mode; onDone: () => void }) {
       status,
       waitingOn: status === "waiting" ? waitingOn.trim() || "Someone else" : undefined,
       threadId: threadId || undefined,
+      repeatEveryDays: repeat ? Number(repeat) : undefined,
       ...(dueChanged ? { dueDate: due || undefined, dueDayOffset: undefined, dueSource: undefined } : {}),
     };
     if (t) {
@@ -149,6 +152,22 @@ function TaskForm({ mode, onDone }: { mode: Mode; onDone: () => void }) {
           {t?.dueSource && !due && <p className="mt-1 text-xs text-muted">Was set from “{t.dueSource}”.</p>}
         </div>
       </div>
+
+      <label htmlFor="task-repeat" className="mt-4 block text-sm font-semibold">
+        Repeats
+      </label>
+      <select id="task-repeat" value={repeat} onChange={(e) => setRepeat(e.target.value)} className="mt-1 min-h-11 w-full rounded-2xl border-[1.5px] border-line bg-bg px-3">
+        <option value="">Never</option>
+        {t?.repeatEveryDays && !REPEAT_OPTIONS.some((o) => o.days === t.repeatEveryDays) && <option value={t.repeatEveryDays}>Every {t.repeatEveryDays} days</option>}
+        {REPEAT_OPTIONS.map((o) => (
+          <option key={o.days} value={o.days}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <p className="mt-1 text-xs text-muted">
+        {repeat ? "When you finish it, the next one is added, due that many days later." : "Pick a repeat and the next one appears when you finish this."}
+      </p>
 
       <label htmlFor="task-thread" className="mt-4 block text-sm font-semibold">
         Life Thread

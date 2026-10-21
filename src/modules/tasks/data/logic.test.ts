@@ -8,7 +8,7 @@ describe("task views", () => {
   it("splits tasks into Today, Upcoming, Waiting On and Completed", () => {
     const c = viewCounts(SEED_TASKS, now);
     expect(c.today + c.upcoming + c.waiting + c.done).toBe(SEED_TASKS.length);
-    expect(viewTasks(SEED_TASKS, "today", now).map((t) => t.id).sort()).toEqual(["k1", "k2"]);
+    expect(viewTasks(SEED_TASKS, "today", now).map((t) => t.id).sort()).toEqual(["k1", "k12", "k2"]); // k12: the overdue furnace filter
     expect(viewTasks(SEED_TASKS, "waiting", now).every((t) => t.status === "waiting" && t.waitingOn)).toBe(true);
   });
   it("puts undated tasks in Upcoming after dated ones and never invents a date", () => {

@@ -54,6 +54,4 @@ export function sortTasks(ts: Task[]) {
   return [...ts].sort((a, b) => Number(a.status === "done") - Number(b.status === "done") || b.createdAt - a.createdAt);
 }
 
-export function toISODate(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+export { toISODate } from "./recur";

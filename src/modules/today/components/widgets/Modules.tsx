@@ -4,7 +4,7 @@ import { addDays, formatDay, untilLabel, useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
 import { Card, EmptyState, Tag } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
-import { maintenanceStore, nextDue } from "@/modules/home";
+import { useUpkeep } from "@/modules/home";
 import { packingProgress, tripStore } from "@/modules/travel";
 import { Frame } from "./Frame";
 
@@ -39,10 +39,7 @@ export function TripWidget() {
 }
 
 export function UpkeepWidget() {
-  const items = useStore(maintenanceStore)
-    .map((m) => ({ m, due: nextDue(m) }))
-    .filter((x) => x.due.state !== "ok")
-    .sort((a, b) => a.due.offset - b.due.offset);
+  const items = useUpkeep().filter((x) => x.due.state !== "ok");
   return (
     <Frame id="upkeep" title="Home upkeep" href="/home">
       {items.length === 0 ? (

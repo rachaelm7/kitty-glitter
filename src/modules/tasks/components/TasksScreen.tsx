@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { relativeDay, useNow } from "@/core/date";
@@ -10,6 +11,7 @@ import { Icon } from "@/core/ui/icons";
 import { useToast } from "@/core/ui/Toast";
 import { ThreadTag } from "@/modules/threads";
 import { dueOffset, viewCounts, viewTasks, type TaskView } from "../data/logic";
+import { repeatLabel } from "../data/recur";
 import { addTask, taskStore, toggleTask } from "../data/store";
 import { CATEGORIES, type Task, type TaskCategory } from "../data/types";
 import { TaskSheet } from "./TaskSheet";
@@ -117,7 +119,7 @@ export function TasksScreen() {
               onToggle={() => {
                 const wasDone = t.status === "done";
                 toggleTask(t.id);
-                toast(wasDone ? "Moved back to your list" : "Nice. Marked done", { label: "Undo", onClick: () => toggleTask(t.id) });
+                toast(wasDone ? "Moved back to your list" : t.repeatEveryDays ? `Done. Next one is due in ${t.repeatEveryDays} days` : "Nice. Marked done", { label: "Undo", onClick: () => toggleTask(t.id) });
               }}
               onOpen={() => setSheet({ kind: "edit", id: t.id })}
               onOpenEmail={() => {
@@ -157,6 +159,16 @@ function TaskRow({ t, now, onToggle, onOpen, onOpenEmail }: { t: Task; now: Date
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <Tag tone="lavender">{t.category}</Tag>
           {t.kind === "reminder" && <Tag tone="neutral">Reminder</Tag>}
+          {t.repeatEveryDays && (
+            <Tag tone="neutral">
+              <Icon.Undo width={12} height={12} /> {repeatLabel(t.repeatEveryDays)}
+            </Tag>
+          )}
+          {t.linkedTo && (
+            <Link href="/home" className="inline-flex items-center gap-1 rounded-full border border-line px-2.5 py-0.5 text-xs font-semibold hover:bg-surface-2">
+              <Icon.House width={13} height={13} /> Home upkeep
+            </Link>
+          )}
           {off !== undefined && !done && <Tag tone={off < 0 ? "urgent" : off === 0 ? "accent" : "champagne"}>{off < 0 ? `Overdue · ${relativeDay(off, now)}` : `Due ${relativeDay(off, now)}`}</Tag>}
           {t.emailId && (
             <button type="button" onClick={onOpenEmail} className="inline-flex items-center gap-1 rounded-full border border-line px-2.5 py-0.5 text-xs font-semibold hover:bg-surface-2">

@@ -5,19 +5,23 @@ import { useStore } from "@/core/store/createStore";
 import { Button, Card, CheckCircle, PageHeader, Section, Tag, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { useToast } from "@/core/ui/Toast";
-import { sortTasks, taskStore, toggleTask } from "@/modules/tasks";
+import Link from "next/link";
+import { requestOpen } from "@/core/store/intent";
+import { repeatLabel, sortTasks, taskStore, toggleTask } from "@/modules/tasks";
 import { ThreadTag } from "@/modules/threads";
-import { coverageState, nextDue, sortMaintenance, type DueState } from "../data/logic";
-import { coverage, maintenanceStore, markDone } from "../data/store";
+import { coverageState, lastDoneOffset, type DueState } from "../data/logic";
+import { coverage, markDone } from "../data/store";
+import { useUpkeep } from "../data/useUpkeep";
 
 const STATE_LABEL: Record<DueState, string> = { overdue: "Overdue", soon: "Due soon", ok: "On track" };
 
 export function HomeScreen() {
   const now = useNow();
   const toast = useToast();
-  const items = sortMaintenance(useStore(maintenanceStore));
-  const tasks = sortTasks(useStore(taskStore)).filter((t) => t.threadId === "t-house");
-  const attention = items.filter((m) => nextDue(m).state !== "ok").length;
+  const upkeep = useUpkeep();
+  const allTasks = useStore(taskStore);
+  const tasks = sortTasks(allTasks).filter((t) => t.threadId === "t-house" && !t.linkedTo);
+  const attention = upkeep.filter((x) => x.due.state !== "ok").length;
 
   return (
     <div>
@@ -30,8 +34,8 @@ export function HomeScreen() {
       <div className="lg:grid lg:grid-cols-2 lg:gap-8">
         <Section title="Maintenance" id="maintenance" action={<span className="text-sm text-muted">{attention} need attention</span>}>
           <ul className="space-y-2.5">
-            {items.map((m) => {
-              const due = nextDue(m);
+            {upkeep.map(({ m, due, task }) => {
+              const last = lastDoneOffset(m, now, allTasks);
               return (
                 <li
                   key={m.id}
@@ -42,7 +46,7 @@ export function HomeScreen() {
                       <p className="text-xs font-bold tracking-wide text-muted uppercase">{m.area}</p>
                       <b className="block font-semibold">{m.title}</b>
                       <p className="text-sm text-muted">
-                        Every {m.everyDays} days · last done {m.lastDoneOffset === 0 ? "today" : `${-m.lastDoneOffset} days ago`}
+                        Every {m.everyDays} days · last done {last === 0 ? "today" : `${-last} days ago`}
                       </p>
                       {m.how && <p className="mt-1 text-sm">{m.how}</p>}
                     </div>
@@ -51,19 +55,29 @@ export function HomeScreen() {
                       <span className="text-xs text-muted">{due.offset < 0 ? `${-due.offset}d late` : untilLabel(due.offset)}</span>
                     </span>
                   </div>
-                  {due.state !== "ok" && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="mt-3"
-                      onClick={() => {
-                        markDone(m.id);
-                        toast(`${m.title}: marked done`);
-                      }}
-                    >
-                      <Icon.Check width={16} height={16} /> Mark done
-                    </Button>
-                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {due.state !== "ok" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const undo = markDone(m.id);
+                          toast(`${m.title}: marked done`, { label: "Undo", onClick: undo });
+                        }}
+                      >
+                        <Icon.Check width={16} height={16} /> Mark done
+                      </Button>
+                    )}
+                    {task && (
+                      <Link
+                        href="/tasks"
+                        onClick={() => requestOpen({ task: task.id })}
+                        className="inline-flex min-h-8 items-center gap-1 rounded-full border border-line px-2.5 text-xs font-semibold hover:bg-surface-2"
+                      >
+                        <Icon.Tasks width={13} height={13} /> On your Tasks · {task.repeatEveryDays ? repeatLabel(task.repeatEveryDays).toLowerCase() : "once"}
+                      </Link>
+                    )}
+                  </div>
                 </li>
               );
             })}

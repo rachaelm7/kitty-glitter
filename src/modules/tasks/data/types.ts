@@ -20,6 +20,12 @@ export type Task = {
   emailId?: string;
   emailFrom?: string;
   threadId?: string;
+  /** Repeats this many days after each completion (set by the user, never guessed). */
+  repeatEveryDays?: number;
+  /** Opaque link to another module's item, e.g. a Home upkeep schedule. */
+  linkedTo?: { kind: "maintenance"; id: string };
+  /** The completed task this occurrence was created from. */
+  spawnedFrom?: string;
   createdAt: number;
   completedAt?: number;
 };
