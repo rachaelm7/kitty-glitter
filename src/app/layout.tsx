@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fraunces } from "next/font/google";
 import { AppShell } from "@/core/ui/AppShell";
+import { SearchHost } from "@/modules/hub";
 import { ToastProvider } from "@/core/ui/Toast";
 import { RegisterServiceWorker } from "@/core/pwa/RegisterServiceWorker";
 import { themeScript } from "@/core/theme/theme";
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-dvh">
         <ToastProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell extras={<SearchHost />}>{children}</AppShell>
         </ToastProvider>
         <RegisterServiceWorker />
       </body>

@@ -9,3 +9,4 @@ export { useChanges } from "./components/useChanges";
 export { buildChanges, summarizeChanges } from "./data/changes";
 export type { Change } from "./data/changes";
 export { deriveThreadState } from "./data/threadState";
+export { SearchHost } from "./components/SearchHost";
