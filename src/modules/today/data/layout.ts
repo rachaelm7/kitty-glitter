@@ -1,5 +1,6 @@
 export const WIDGETS = [
   { id: "brief", name: "Morning brief", wide: true },
+  { id: "changes", name: "Since yesterday" },
   { id: "priorities", name: "Three priorities" },
   { id: "appointments", name: "Upcoming appointments" },
   { id: "tasks", name: "Tasks needing attention" },

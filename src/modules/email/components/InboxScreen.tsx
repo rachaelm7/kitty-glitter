@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
 import { clearIntent, intentStore } from "@/core/store/intent";
@@ -11,7 +11,7 @@ import { Icon } from "@/core/ui/icons";
 import { useToast } from "@/core/ui/Toast";
 import { addTask } from "@/modules/tasks";
 import { mockEmailProvider } from "../data/mock";
-import { TABS, filterMessages, groupNewsletters, isUnread, promoTotal, tabCounts, type InboxTab } from "../data/logic";
+import { TABS, filterMessages, groupNewsletters, isUnread, moveFocus, promoTotal, tabCounts, type InboxTab } from "../data/logic";
 import { inboxStateStore, markRead, setArchived } from "../data/store";
 import type { AccountId, Message } from "../data/types";
 import { AccountDot } from "./AccountDot";
@@ -33,6 +33,8 @@ export function InboxScreen() {
   const [showArchived, setShowArchived] = useState(false);
   const [newsOpen, setNewsOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const list = useMemo(() => filterMessages(all, { account, tab, query, state, showArchived }), [all, account, tab, query, state, showArchived]);
   const rows = showArchived || query ? list.map((message) => ({ kind: "message" as const, message })) : groupNewsletters(list);
@@ -41,6 +43,82 @@ export function InboxScreen() {
   const totalUnread = accounts.reduce((n, a) => n + a.unread, 0);
   const openId = intent.email ?? localOpen;
   const open = all.find((m) => m.id === openId) ?? null;
+
+  const visibleIds = useMemo(
+    () => rows.flatMap((r) => (r.kind === "message" ? [r.message.id] : newsOpen ? r.messages.map((m) => m.id) : [])),
+    [rows, newsOpen],
+  );
+
+  function toggleRead(m: Message) {
+    const wasUnread = isUnread(m, state);
+    markRead(m.id, wasUnread);
+    toast(wasUnread ? "Marked as read" : "Marked as unread", { label: "Undo", onClick: () => markRead(m.id, !wasUnread) });
+  }
+
+  // Desktop keyboard shortcuts: J/K move, Enter opens, E archives, U toggles read, / searches.
+  // The listener is attached once, so it reads the newest values and handlers from this ref.
+  const latest = useRef({ visibleIds, focusId, all, openId, openMessage, archive, toggleRead });
+  useEffect(() => {
+    latest.current = { visibleIds, focusId, all, openId, openMessage, archive, toggleRead };
+  });
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.closest("input, textarea, select, [contenteditable]") || t.closest("dialog"))) return;
+      const { visibleIds: ids, focusId: cur, all: msgs, openId: opened, openMessage: open, archive: doArchive, toggleRead: doToggle } = latest.current;
+      if (opened) return;
+      const find = (id: string | null) => msgs.find((m) => m.id === id);
+      switch (e.key) {
+        case "j":
+        case "ArrowDown":
+          e.preventDefault();
+          setFocusId(moveFocus(ids, cur, 1));
+          break;
+        case "k":
+        case "ArrowUp":
+          e.preventDefault();
+          setFocusId(moveFocus(ids, cur, -1));
+          break;
+        case "Enter":
+        case "o": {
+          const m = find(cur);
+          if (m && t?.tagName !== "BUTTON" && t?.tagName !== "A") {
+            e.preventDefault();
+            open(m);
+          }
+          break;
+        }
+        case "e": {
+          const m = find(cur);
+          if (m) {
+            // Keep the selection on the neighbouring message after this one leaves the list.
+            const next = ids[ids.indexOf(m.id) + 1] ?? ids[ids.indexOf(m.id) - 1] ?? null;
+            doArchive(m);
+            setFocusId(next);
+          }
+          break;
+        }
+        case "u": {
+          const m = find(cur);
+          if (m) doToggle(m);
+          break;
+        }
+        case "/":
+          e.preventDefault();
+          searchRef.current?.focus();
+          break;
+        default:
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    if (!focusId) return;
+    document.querySelector(`[data-message-id="${focusId}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [focusId]);
 
   function openMessage(m: Message) {
     markRead(m.id);
@@ -95,6 +173,7 @@ export function InboxScreen() {
       <div className="relative mt-4">
         <Icon.Search className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted" width={20} height={20} />
         <input
+          ref={searchRef}
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -192,9 +271,11 @@ export function InboxScreen() {
                 message={r.message}
                 unread={isUnread(r.message, state)}
                 archived={!!state.archived[r.message.id]}
+                focused={focusId === r.message.id}
                 now={now}
                 onOpen={() => openMessage(r.message)}
                 onArchive={() => archive(r.message)}
+                onToggleRead={() => toggleRead(r.message)}
               />
             ) : (
               <li key="newsletters" className="border-b border-line last:border-b-0">
@@ -223,8 +304,10 @@ export function InboxScreen() {
                         message={m}
                         unread={isUnread(m, state)}
                         now={now}
+                        focused={focusId === m.id}
                         onOpen={() => openMessage(m)}
                         onArchive={() => archive(m)}
+                        onToggleRead={() => toggleRead(m)}
                       />
                     ))}
                   </ul>
@@ -233,6 +316,17 @@ export function InboxScreen() {
             ),
           )}
         </ul>
+      )}
+
+      {rows.length > 0 && !refreshing && (
+        <p className="mt-3 text-center text-xs text-muted">
+          <span className="hidden lg:inline">
+            Keyboard: <kbd className="rounded bg-surface-2 px-1">J</kbd>/<kbd className="rounded bg-surface-2 px-1">K</kbd> move ·{" "}
+            <kbd className="rounded bg-surface-2 px-1">Enter</kbd> open · <kbd className="rounded bg-surface-2 px-1">E</kbd> archive ·{" "}
+            <kbd className="rounded bg-surface-2 px-1">U</kbd> read/unread · <kbd className="rounded bg-surface-2 px-1">/</kbd> search
+          </span>
+          <span className="lg:hidden">Swipe right to mark read or unread, left to archive (demo).</span>
+        </p>
       )}
 
       {!showArchived && archivedCount > 0 && (

@@ -7,7 +7,7 @@ import { useStore } from "@/core/store/createStore";
 import { PageHeader, Tag, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { appointmentStore, needsAttention } from "@/modules/appointments";
-import { maintenanceStore, nextDue } from "@/modules/home";
+import { useUpkeep } from "@/modules/home";
 import { threadStore } from "@/modules/threads";
 import { tripStore } from "@/modules/travel";
 
@@ -18,7 +18,7 @@ export function MoreScreen() {
   const threads = useStore(threadStore);
   const appts = useStore(appointmentStore);
   const trips = useStore(tripStore);
-  const upkeep = useStore(maintenanceStore);
+  const upkeep = useUpkeep();
 
   const preview: Record<string, string> = {
     threads: `${threads.filter((t) => t.stage === "action").length} need you · ${threads.filter((t) => t.stage === "waiting").length} waiting`,
@@ -27,7 +27,7 @@ export function MoreScreen() {
       const next = [...trips].filter((t) => t.startOffset >= 0).sort((a, b) => a.startOffset - b.startOffset)[0];
       return next ? `${next.name} ${untilLabel(next.startOffset)}` : "No trips planned";
     })(),
-    home: `${upkeep.filter((m) => nextDue(m).state === "overdue").length} overdue · ${upkeep.filter((m) => nextDue(m).state === "soon").length} due soon`,
+    home: `${upkeep.filter((x) => x.due.state === "overdue").length} overdue · ${upkeep.filter((x) => x.due.state === "soon").length} due soon`,
     finances: "1 bill to pay by hand",
     collections: "Gifts, books, recipes, cat care",
     settings: "Theme, accounts, demo data",

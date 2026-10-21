@@ -80,3 +80,11 @@ export function toProposals(choices: Record<string, CleanupChoice | undefined>):
 export function promoTotal(senders: PromoSender[]) {
   return senders.reduce((n, s) => n + s.count, 0);
 }
+
+/** Move the keyboard selection through the visible message ids. Clamps at both ends. */
+export function moveFocus(ids: string[], current: string | null, dir: 1 | -1): string | null {
+  if (ids.length === 0) return null;
+  const i = current ? ids.indexOf(current) : -1;
+  if (i === -1) return dir === 1 ? ids[0] : ids[ids.length - 1];
+  return ids[Math.max(0, Math.min(ids.length - 1, i + dir))];
+}

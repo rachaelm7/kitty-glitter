@@ -6,9 +6,9 @@ describe("Today widget layout", () => {
     expect(visibleWidgets(DEFAULT_LAYOUT)).not.toContain("promos");
   });
   it("moves widgets and stops at the ends", () => {
-    const l = moveWidget(DEFAULT_LAYOUT, "priorities", -1);
-    expect(resolveOrder(l).slice(0, 2)).toEqual(["priorities", "brief"]);
-    expect(moveWidget(l, "priorities", -1)).toBe(l);
+    const l = moveWidget(DEFAULT_LAYOUT, "priorities", -1); // was third (after brief and changes)
+    expect(resolveOrder(l).slice(0, 3)).toEqual(["brief", "priorities", "changes"]);
+    expect(moveWidget(l, "brief", -1)).toBe(l); // already first
   });
   it("toggles visibility", () => {
     const l = toggleWidget(DEFAULT_LAYOUT, "agenda");

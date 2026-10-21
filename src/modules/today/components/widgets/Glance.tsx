@@ -9,7 +9,7 @@ import { Card, CheckCircle, EmptyState, Tag, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { STATUS_LABEL, appointmentStore, needsAttention, nextActions } from "@/modules/appointments";
 import { AccountDot, emailProvider, inboxStateStore, isUnread, markRead } from "@/modules/email";
-import { StagePill } from "@/modules/hub";
+import { StagePill, deriveThreadState } from "@/modules/hub";
 import { dueOffset, taskStore, toggleTask, viewTasks } from "@/modules/tasks";
 import { threadStore } from "@/modules/threads";
 import { Frame } from "./Frame";
@@ -140,6 +140,8 @@ export function EmailWidget() {
 }
 
 export function ThreadsWidget() {
+  const now = useNow();
+  const tasks = useStore(taskStore);
   const threads = useStore(threadStore)
     .filter((t) => t.stage !== "done")
     .sort((a, b) => ["action", "waiting", "scheduled"].indexOf(a.stage) - ["action", "waiting", "scheduled"].indexOf(b.stage))
@@ -149,6 +151,7 @@ export function ThreadsWidget() {
       <ul className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1">
         {threads.map((t) => {
           const I = Icon[t.icon];
+          const st = deriveThreadState(t, tasks, now);
           return (
             <li key={t.id}>
               <Link href={`/threads/${t.id}`} className="flex h-full items-start gap-3 rounded-[22px] border border-line/70 bg-surface p-3.5 shadow-soft transition-shadow hover:shadow-lift">
@@ -160,7 +163,7 @@ export function ThreadsWidget() {
                     <b className="text-[15px] leading-snug font-semibold">{t.name}</b>
                     <StagePill stage={t.stage} />
                   </span>
-                  <span className="mt-0.5 block text-sm text-muted">{t.waitingOn ? `Waiting on ${t.waitingOn}` : t.next ? `Next: ${t.next.label}` : t.status}</span>
+                  <span className="mt-0.5 block text-sm text-muted">{st.allDone ? "All caught up. Ready to wrap up?" : st.next && !st.next.waiting ? `Next: ${st.next.label}` : st.waitingOn ? `Waiting on ${st.waitingOn}` : st.status}</span>
                 </span>
               </Link>
             </li>

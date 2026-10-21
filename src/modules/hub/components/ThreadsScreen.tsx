@@ -7,6 +7,7 @@ import { Chip, EmptyState, PageHeader } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { threadStore, type ThreadStage } from "@/modules/threads";
 import { buildThreadView } from "../data/threadView";
+import { deriveThreadState } from "../data/threadState";
 import { StagePill, STAGE_LABEL } from "./StagePill";
 import { useThreadSources } from "./useThreadSources";
 
@@ -43,6 +44,7 @@ export function ThreadsScreen() {
         <ul className="mt-4 grid gap-3.5 lg:grid-cols-2">
           {shown.map((t, i) => {
             const v = buildThreadView(t, src);
+            const st = deriveThreadState(t, src.tasks, src.now);
             const I = Icon[t.icon];
             return (
               <li key={t.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
@@ -59,17 +61,25 @@ export function ThreadsScreen() {
                         <b className="font-display text-lg leading-tight font-semibold">{t.name}</b>
                         <StagePill stage={t.stage} />
                       </span>
-                      <span className="mt-0.5 block text-sm text-muted">{t.status}</span>
+                      <span className="mt-0.5 block text-sm text-muted">{st.status}</span>
                     </span>
                   </span>
-                  {t.next && t.stage !== "done" && (
+                  {t.stage !== "done" && (st.next || st.allDone) && (
                     <span className="rounded-2xl bg-surface-2 px-3 py-2 text-sm">
-                      <b className="font-semibold">Next:</b> {t.next.label}
+                      {st.allDone ? (
+                        <>
+                          <b className="font-semibold">All caught up.</b> Ready to wrap this up?
+                        </>
+                      ) : (
+                        <>
+                          <b className="font-semibold">Next:</b> {st.next!.label}
+                        </>
+                      )}
                     </span>
                   )}
-                  {t.waitingOn && t.stage !== "done" && (
+                  {st.waitingOn && t.stage !== "done" && (
                     <span className="flex items-center gap-1.5 text-sm text-lavender">
-                      <Icon.Clock width={16} height={16} /> Waiting on {t.waitingOn}
+                      <Icon.Clock width={16} height={16} /> Waiting on {st.waitingOn}
                     </span>
                   )}
                   <span className="mt-auto flex flex-wrap gap-3 text-xs text-muted">

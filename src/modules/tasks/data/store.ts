@@ -2,10 +2,11 @@
 
 import { createStore } from "@/core/store/createStore";
 import { SEED_TASKS } from "./mock";
+import { completeInList, openLinked, reopenInList } from "./recur";
 import type { Task, TaskCategory } from "./types";
 
-// v2: tasks gained status, categories and links.
-export const taskStore = createStore<Task[]>("tasks", SEED_TASKS, 2);
+// v3: tasks gained repeats and links to Home upkeep.
+export const taskStore = createStore<Task[]>("tasks", SEED_TASKS, 3);
 
 let counter = 0;
 export function newTaskId() {
@@ -25,23 +26,36 @@ export function addTask(input: NewTask): string | undefined {
 }
 
 export function updateTask(id: string, patch: Partial<Task>) {
-  taskStore.set((ts) =>
-    ts.map((t) => {
-      if (t.id !== id) return t;
-      const next = { ...t, ...patch };
-      if (next.status === "done" && t.status !== "done") next.completedAt = Date.now();
-      if (next.status !== "done") next.completedAt = undefined;
-      return next;
-    }),
-  );
+  taskStore.set((ts) => {
+    const t = ts.find((x) => x.id === id);
+    if (!t) return ts;
+    const { status, ...rest } = patch;
+    let list = ts.map((x) => (x.id === id ? { ...x, ...rest } : x));
+    if (status && status !== t.status) {
+      if (status === "done") list = completeInList(list, id, new Date(), newTaskId());
+      else if (t.status === "done") list = reopenInList(list, id, status);
+      else list = list.map((x) => (x.id === id ? { ...x, status } : x));
+    }
+    return list;
+  });
 }
 
 export function toggleTask(id: string) {
-  taskStore.set((ts) =>
-    ts.map((t) =>
-      t.id === id ? (t.status === "done" ? { ...t, status: "open", completedAt: undefined } : { ...t, status: "done", completedAt: Date.now() }) : t,
-    ),
-  );
+  taskStore.set((ts) => {
+    const t = ts.find((x) => x.id === id);
+    if (!t) return ts;
+    return t.status === "done" ? reopenInList(ts, id) : completeInList(ts, id, new Date(), newTaskId());
+  });
+}
+
+/**
+ * Finish the open task tied to an upkeep item (e.g. from Home → "Mark done").
+ * Returns the ids it completed, so the caller can offer Undo.
+ */
+export function completeLinkedTasks(kind: "maintenance", id: string): string[] {
+  const ids = openLinked(taskStore.get(), kind, id).map((t) => t.id);
+  ids.forEach((taskId) => taskStore.set((ts) => completeInList(ts, taskId, new Date(), newTaskId())));
+  return ids;
 }
 
 export function removeTask(id: string) {

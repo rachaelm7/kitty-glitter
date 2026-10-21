@@ -13,4 +13,8 @@ export const SEED_TASKS: Task[] = [
   { id: "k9", title: "Pay the rest of the card statement", status: "open", category: "Money", dueDayOffset: 17, emailId: "m5", emailFrom: "Sapphire Card", createdAt: 2 },
   { id: "k10", title: "Buy lemons and butter for Priya's tart", status: "open", category: "Social", threadId: "t-party", createdAt: 1 },
   { id: "k11", title: "Order a new furnace filter", status: "done", category: "Home", threadId: "t-house", createdAt: 0, completedAt: 0 },
+  // Repeating tasks that mirror the Home upkeep schedule: finish one and the next appears, and Home updates.
+  { id: "k12", title: "Replace the furnace filter", status: "open", category: "Home", dueDayOffset: -14, repeatEveryDays: 90, linkedTo: { kind: "maintenance", id: "h1" }, notes: "16×25×1 filter, arrow toward the furnace.", createdAt: 11 },
+  { id: "k13", title: "Test smoke and CO detectors", status: "open", category: "Home", dueDayOffset: 4, repeatEveryDays: 30, linkedTo: { kind: "maintenance", id: "h2" }, createdAt: 12 },
+  { id: "k14", title: "Clear the gutters", status: "open", category: "Home", dueDayOffset: 10, repeatEveryDays: 180, linkedTo: { kind: "maintenance", id: "h4" }, createdAt: 13 },
 ];

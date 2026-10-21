@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ACCOUNTS, MESSAGES, PROMO_SENDERS, mockEmailProvider } from "./mock";
-import { filterMessages, groupNewsletters, isUnread, promoTotal, tabCounts, toProposals } from "./logic";
+import { filterMessages, groupNewsletters, isUnread, moveFocus, promoTotal, tabCounts, toProposals } from "./logic";
 
 const empty = { read: {}, archived: {} };
 
@@ -61,5 +61,22 @@ describe("privacy", () => {
   });
   it("every message explains its categorization", () => {
     for (const m of MESSAGES) expect(m.why.length).toBeGreaterThan(5);
+  });
+});
+
+describe("keyboard focus", () => {
+  const ids = ["a", "b", "c"];
+  it("starts at the top going down and the bottom going up", () => {
+    expect(moveFocus(ids, null, 1)).toBe("a");
+    expect(moveFocus(ids, null, -1)).toBe("c");
+  });
+  it("moves and clamps at the ends", () => {
+    expect(moveFocus(ids, "a", 1)).toBe("b");
+    expect(moveFocus(ids, "c", 1)).toBe("c");
+    expect(moveFocus(ids, "a", -1)).toBe("a");
+  });
+  it("recovers when the focused message disappeared (archived)", () => {
+    expect(moveFocus(ids, "gone", 1)).toBe("a");
+    expect(moveFocus([], "a", 1)).toBeNull();
   });
 });
