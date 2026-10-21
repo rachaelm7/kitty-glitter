@@ -1,17 +1,16 @@
 "use client";
 
-import { createStore } from "@/core/store/createStore";
+import { createStore, shiftChanged } from "@/core/store/createStore";
 import { SEED_APPOINTMENTS } from "./mock";
 import type { Appointment, Status } from "./types";
 
 export const appointmentStore = createStore<Appointment[]>("appointments", SEED_APPOINTMENTS, 1, {
-  shift: (list, d) =>
-    list.map((a) => ({
-      ...a,
-      statusSince: a.statusSince + d,
-      events: a.events.map((e) => ({ ...e, dayOffset: e.dayOffset + d })),
-      ...(a.when && { when: { ...a.when, dayOffset: a.when.dayOffset + d } }),
-    })),
+  shift: shiftChanged(SEED_APPOINTMENTS, (a, d) => ({
+    ...a,
+    statusSince: a.statusSince + d,
+    events: a.events.map((e) => ({ ...e, dayOffset: e.dayOffset + d })),
+    ...(a.when && { when: { ...a.when, dayOffset: a.when.dayOffset + d } }),
+  })),
 });
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;

@@ -60,7 +60,8 @@ function Detail({ a, onEdit }: { a: Appointment; onEdit: () => void }) {
       </div>
       {a.when && (
         <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
-          <Icon.Calendar width={18} height={18} /> {formatDay(addDays(now, a.when.dayOffset))} at {a.when.time} · {a.when.place}
+          <Icon.Calendar width={18} height={18} /> {formatDay(addDays(now, a.when.dayOffset))}
+          {a.when.time && ` at ${a.when.time}`} · {a.when.place}
         </p>
       )}
 

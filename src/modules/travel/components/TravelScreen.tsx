@@ -103,7 +103,7 @@ export function TravelScreen() {
         <p className="text-sm font-semibold opacity-90">{trip.destination}</p>
         <h2 className="mt-1 text-[26px] leading-tight">{trip.name}</h2>
         <p className="mt-1">
-          {formatDay(start)} – {formatDay(end)} · {trip.nights} nights
+          {formatDay(start)} – {formatDay(end)} · {trip.nights === 0 ? "day trip" : `${trip.nights} night${trip.nights === 1 ? "" : "s"}`}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <p className="inline-flex rounded-full bg-ink/15 px-3 py-1 text-sm font-semibold">

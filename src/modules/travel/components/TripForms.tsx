@@ -41,7 +41,7 @@ export function TripForm({ trip, onDone }: { trip?: Trip; onDone: (tripId?: stri
   const [tried, setTried] = useState(false);
   const errors: TripErrors = tried ? validateTrip({ name, destination, start, nights }) : {};
   const n = Number(nights);
-  const returnDay = start && Number.isInteger(n) && n >= 0 ? formatDay(addDays(now, offsetOfISO(start, now) + n)) : undefined;
+  const returnDay = start && nights.trim() !== "" && Number.isInteger(n) && n >= 0 ? formatDay(addDays(now, offsetOfISO(start, now) + n)) : undefined;
 
   function save() {
     const found = validateTrip({ name, destination, start, nights });

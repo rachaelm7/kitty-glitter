@@ -1,12 +1,12 @@
 "use client";
 
-import { createStore } from "@/core/store/createStore";
+import { createStore, shiftChanged } from "@/core/store/createStore";
 import { SEED_THREADS } from "./mock";
 import type { LifeThread, ThreadNote } from "./types";
 
 // v2: threads gained status, stage, next step and timeline.
 export const threadStore = createStore<LifeThread[]>("threads", SEED_THREADS, 2, {
-  shift: (ts, d) => ts.map((t) => ({ ...t, events: t.events.map((e) => ({ ...e, dayOffset: e.dayOffset + d })) })),
+  shift: shiftChanged(SEED_THREADS, (t, d) => ({ ...t, events: t.events.map((e) => ({ ...e, dayOffset: e.dayOffset + d })) })),
 });
 export const threadNoteStore = createStore<ThreadNote[]>("thread-notes", [], 2);
 

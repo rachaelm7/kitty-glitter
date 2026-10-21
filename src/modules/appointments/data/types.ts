@@ -33,7 +33,7 @@ export type Appointment = {
   status: Status;
   /** Day the current status started, relative to today. */
   statusSince: number;
-  when?: { dayOffset: number; time: string; place: string };
+  when?: { dayOffset: number; time: string; place: string }; // time may be "" when not known
   referredBy?: string;
   events: TimelineEvent[];
   threadId?: string;

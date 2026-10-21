@@ -98,7 +98,8 @@ export function AppointmentsScreen() {
                   <ProgressBar status={a.status} />
                   {a.when && a.status === "scheduled" && (
                     <span className="flex items-center gap-1.5 text-sm font-semibold">
-                      <Icon.Calendar width={16} height={16} /> {formatDay(addDays(now, a.when.dayOffset))}, {a.when.time}
+                      <Icon.Calendar width={16} height={16} /> {formatDay(addDays(now, a.when.dayOffset))}
+                      {a.when.time && `, ${a.when.time}`}
                     </span>
                   )}
                   {first && (

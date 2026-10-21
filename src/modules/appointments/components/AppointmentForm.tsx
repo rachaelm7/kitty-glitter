@@ -44,7 +44,7 @@ export function AppointmentForm({ appt, onDone }: { appt?: Appointment; onDone: 
       provider: provider.trim(),
       contact: contact.trim(),
       status,
-      when: date ? { dayOffset: offsetOfISO(date, now), time: time.trim() || "Time not set", place: place.trim() || provider.trim() } : undefined,
+      when: date ? { dayOffset: offsetOfISO(date, now), time: time.trim(), place: place.trim() || provider.trim() } : undefined,
       referredBy: referredBy.trim() || undefined,
       threadId: threadId || undefined,
     };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetweenISO, revive } from "./createStore";
+import { daysBetweenISO, revive, shiftChanged } from "./createStore";
 
 const shift = (xs: { at: number }[], d: number) => xs.map((x) => ({ at: x.at + d }));
 
@@ -22,5 +22,14 @@ describe("saved day offsets move with the calendar", () => {
   });
   it("ignores the wrapper for stores without offsets", () => {
     expect(revive({ savedOn: "2026-10-20", state: 1 }, "2026-10-21")).toEqual({ savedOn: "2026-10-20", state: 1 });
+  });
+});
+
+describe("only changed sample items age", () => {
+  const seed = [{ id: "a", at: 2 }, { id: "b", at: 5 }];
+  const shiftList = shiftChanged(seed, (x, d) => ({ ...x, at: x.at + d }));
+  it("keeps untouched sample items fresh and moves changed or new ones", () => {
+    const saved = [{ id: "a", at: 2 }, { id: "b", at: 6 }, { id: "c", at: 3 }];
+    expect(shiftList(saved, -1)).toEqual([{ id: "a", at: 2 }, { id: "b", at: 5 }, { id: "c", at: 2 }]);
   });
 });

@@ -3,6 +3,60 @@
 Living log of what Claude Code has built, how it was checked, and what is still open.
 Newest increment first. Updated in every PR.
 
+## Latest session: edit appointments and trips, smarter Brain Dump, search actions (branch `claude/next-three-c`)
+
+Built from the previous session's "next three", working as a developer team for the owner (now recorded in `CLAUDE.md`). Stacked on `claude/global-search` (PR #11).
+
+### What improved
+0. **Found and fixed first: saved dates froze.** Sample data counts days from "today", and once anything was saved, those counts stopped moving. An appointment "in 2 days" stayed "in 2 days" forever, and waiting times never grew. Stores now remember the day they were saved and move every date forward on load (`docs/decisions/0004-dates-move-with-the-calendar.md`). This covers tasks, Life Threads, Home upkeep, appointments and trips. It also fixed a module-boundary slip (Home imported a Tasks internal).
+1. **Create and edit appointments, trips and bookings.**
+   - **Appointments:** "New appointment" plus "Edit details" on each one: name, type, office, optional phone, status, date, time, place, referred by, and Life Thread. Validation is friendly and focuses the first problem (a scheduled appointment needs a date). Delete has Undo. Status changes made here are logged on the timeline. Next steps no longer say "sent 0 days ago" or show an empty phone number.
+   - **Trips:** "New trip" with name, destination, leaving date, nights (shows "Back Nov 19") and Life Thread. A new trip starts with a short starter packing list. Edit or delete with Undo, and an empty state when there are no trips. Past trips say "Ended …" instead of a negative countdown.
+   - **Bookings:** "Add booking" and tap any booking to edit or delete it (type, day of the trip, name, time, confirmation code, notes). Shortening a trip moves later bookings to its last day rather than losing them.
+   - A small shared `Field` component gives every new form proper labels, `aria-invalid` and `aria-describedby`. Errors appear after the first save attempt, then update as you type.
+2. **Smarter Brain Dump.**
+   - **Repeats:** "every Sunday", "weekly", "every other week", "monthly", "every 3 months", "twice a year", "yearly", "on Sundays", "every 2 weeks". The repeat words are removed from the title, and "every Sunday" also sets the first date.
+   - **Waiting on:** "waiting on the plumber to send a quote" → "The plumber to send a quote", waiting on *the plumber*; "Dana hasn't replied about the venue" → "Hear back from Dana about the venue"; "waiting to hear back from …". A stated date is kept as the follow-up date.
+   - **Review:** each suggestion shows "Repeats" (with the words it came from) and "Waiting on", and you can change or remove either. Nothing is added until you approve it. The summary reports how many are waiting or repeating. A new "Loose ends" sample voice note shows it off.
+3. **Search filters and actions.**
+   - Type **`>`** for actions: New task, New brain dump, New appointment, New trip, Dark, Light or Match device theme. Each one opens the right form on its own screen, or switches the theme with a confirmation toast. Actions also turn up in ordinary searches ("new trip").
+   - **`#email`, `#task`, `#trip` …** or **filter chips** (handy on phones) limit results to one kind. A filter with nothing typed lists that kind, most relevant first, and the active chip scrolls into view.
+   - Appointment and trip results now open **that** appointment or trip, not just the page.
+
+### Independent review and what happened to it
+A **separate review agent** with a fresh context read the commit, probed the parser and simulated the store. It found no rule violations, no blockers, and 11 real issues. All are fixed, with tests:
+- **A tab left open past midnight** stamped the save with the new day while the dates in memory still counted from the old one, so everything slipped a day. Saves now stamp the day the data was loaded.
+- **Linked items drifted apart** (an edited task aged while the email and appointment it points to stayed fresh). Now only items you create or change move with the calendar. Untouched sample items stay fresh, like the sample emails and bills (decision 0004, updated).
+- **Parser false positives:**
+  - "Call the dentist while waiting for the results" became a wait. Waiting phrases now count only at the start.
+  - "I'm waiting for the bus and need to call mom" lost the real task.
+  - "I haven't replied" became "Hear back from I".
+  - "waiting for Friday" left an empty name.
+  - "a monthly pass" and "the daily newspaper" became repeats. Those words now count only at the end of a thought.
+- **Smaller fixes:**
+  - A stray comma no longer leads a title.
+  - "every 30 days" now works.
+  - A blank appointment time is stored blank, not as "Time not set".
+  - Nights read "1 night" or "day trip".
+  - The "Back …" hint no longer shows while Nights is empty.
+
+### What was tested (all run in this session)
+- Lint, typecheck and production build: pass.
+- Unit tests (Vitest): **123 passing** (29 new: date shifting across months and daylight saving, appointment and trip form rules, natural next-step wording, 13 repeat and waiting parser cases, query shorthands, kind filters, browse order, and direct targets).
+- End-to-end (Playwright, iPhone 13 and 1280px desktop, CI settings): **160 passing, 4 skipped by design**. 5 new flows, run at both sizes. They cover appointments (validation → add → edit → reload → delete → undo), travel (validation → new trip → starter packing → add and edit a booking → shorten the trip), a save from two days ago reading correctly today, Brain Dump repeats and waiting through to the Waiting list, and search actions, chips, `#trip` and the theme action. A new axe WCAG 2.1 A/AA check covers the three new forms with errors showing, in light and dark. It caught a low-contrast "Edit trip" button (4.16:1), which is now fixed.
+- Screenshots reviewed at iPhone size. They caught the Actions chip sitting off-screen after typing `>` and the packing reminder writing "ID" as "id". Both are fixed.
+- **Review status:** reviewed by a separate Claude agent, not by ChatGPT or a person. No external review has happened.
+
+### Known gaps
+- Appointments have no "results received" shortcut yet. Use the status list.
+- Search actions can't do bulk changes (like "mark all read"). That's deliberate for now, because bulk changes should go through a confirm step.
+- Brain Dump wording rules are English-only.
+
+### Next three highest-value improvements
+1. **Follow-up nudges for "Waiting on":** when a waiting task hasn't moved in a few days, surface it on Today with a polite, copy-only follow-up draft (never sent).
+2. **Create and edit Life Threads** (name, colour, keywords), and edit or delete thread notes, so the whole organising layer is yours, not just the sample threads.
+3. **Desktop search preview pane:** the highlighted result's details beside the list, with its main action one key away.
+
 ## Latest session: global search, built with four roles (branch `claude/global-search`)
 
 Built as a four-role workflow. The Reviewer was a **separate agent** with a fresh context that never saw the Engineer's reasoning; the other three roles were played by the main session.

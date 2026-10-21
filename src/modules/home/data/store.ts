@@ -1,13 +1,13 @@
 "use client";
 
-import { createStore } from "@/core/store/createStore";
+import { createStore, shiftChanged } from "@/core/store/createStore";
 import { completeLinkedTasks, toggleTask } from "@/modules/tasks";
 import { toISODate } from "@/core/date";
 import { SEED_COVERAGE, SEED_MAINTENANCE } from "./mock";
 import type { MaintenanceItem } from "./types";
 
 export const maintenanceStore = createStore<MaintenanceItem[]>("home-maintenance", SEED_MAINTENANCE, 1, {
-  shift: (ms, d) => ms.map((m) => ({ ...m, lastDoneOffset: m.lastDoneOffset + d })),
+  shift: shiftChanged(SEED_MAINTENANCE, (m, d) => ({ ...m, lastDoneOffset: m.lastDoneOffset + d })),
 });
 export const coverage = SEED_COVERAGE;
 

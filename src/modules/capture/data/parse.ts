@@ -95,15 +95,19 @@ const DAY_NAMES = "sunday|monday|tuesday|wednesday|thursday|friday|saturday";
 
 /** Fixed phrases first, longest meaning first, so "every other week" isn't read as "every week". */
 const REPEATS: [RegExp, number][] = [
-  [/\b(?:every (?:other|second) week|bi-?weekly|fortnightly)\b/, 14],
+  [/\b(?:every (?:other|second) week|(?:bi-?weekly|fortnightly)(?=\s*(?:[,.;!?]|$)))/, 14],
   [/\b(?:twice a year|every half year)\b/, 180],
-  [/\bquarterly\b/, 90],
+  [/\bquarterly(?=\s*(?:[,.;!?]|$))/, 90],
   [new RegExp(`\\b(?:every (?:${DAY_NAMES})|on (?:${DAY_NAMES})s)\\b`), 7],
-  [/\b(?:every day|each day|daily)\b/, 1],
-  [/\b(?:every week|each week|once a week|weekly)\b/, 7],
-  [/\b(?:every month|each month|once a month|monthly)\b/, 30],
-  [/\b(?:every year|each year|once a year|yearly|annually)\b/, 365],
+  // "daily", "monthly" and so on count only at the end ("pay rent monthly"), not as an adjective ("a monthly pass").
+  [/\b(?:every day|each day|daily(?=\s*(?:[,.;!?]|$)))/, 1],
+  [/\b(?:every week|each week|once a week|weekly(?=\s*(?:[,.;!?]|$)))/, 7],
+  [/\b(?:every month|each month|once a month|monthly(?=\s*(?:[,.;!?]|$)))/, 30],
+  [/\b(?:every year|each year|once a year|(?:yearly|annually)(?=\s*(?:[,.;!?]|$)))/, 365],
 ];
+
+/** The most of each unit a repeat can be, so "every 30 days" works and "every 900 weeks" doesn't. */
+const UNIT_MAX: Record<string, number> = { day: 366, week: 52, month: 24, year: 5 };
 
 /** "every 3 months", "every other day": a number with a unit. */
 const REPEAT_N = new RegExp(`\\bevery (${WORD_NUM}) (day|week|month|year)s?\\b`);
@@ -113,7 +117,7 @@ export function findRepeat(fragment: string): { days: number; phrase: string } |
   const m = f.match(REPEAT_N);
   if (m) {
     const n = m[1] === "other" || m[1] === "second" ? 2 : /^\d+$/.test(m[1]) ? Number(m[1]) : NUMBERS[m[1]];
-    if (n && n > 0 && n <= 24) return { days: n * UNIT_DAYS[m[2]], phrase: m[0] };
+    if (n && n > 0 && n <= UNIT_MAX[m[2]]) return { days: n * UNIT_DAYS[m[2]], phrase: m[0] };
   }
   for (const [re, days] of REPEATS) {
     const hit = f.match(re);
@@ -123,8 +127,12 @@ export function findRepeat(fragment: string): { days: number; phrase: string } |
 }
 
 const PRONOUN = /^(?:he|she|they|it|them|someone|somebody|nobody|no one)$/i;
-const WAIT_FOR = /\b(?:(?:i'?m|i am|we'?re|we are|still)\s+)*waiting (?:on|for) (.+?)(?:\s+to\s+(.+))?$/i;
-const WAIT_HEAR = /\b(?:(?:i'?m|i am|still)\s+)*waiting to hear (?:back )?from (.+?)(?:\s+(about|on|re)\s+(.+))?$/i;
+// Anchored at the start: "call the dentist while waiting for the results" is a call, not a wait.
+const WAIT_FOR = /^(?:(?:i'?m|i am|we'?re|we are|still)\s+){0,3}waiting (?:on|for) (.+?)(?:\s+to\s+(.+))?$/i;
+const WAIT_HEAR = /^(?:(?:i'?m|i am|still)\s+){0,3}waiting to hear (?:back )?from (.+?)(?:\s+(about|on|re)\s+(.+))?$/i;
+/** "waiting for the bus and need to call mom": the real task comes after the "and". */
+const OWN_TASK_AFTER = /\b(?:and|but|so|then)\s+(?:i\s+|we\s+)?(?:need|have|should|must|gotta|got|want|will)\b/i;
+const SELF = /^(?:i|we|me|us)$/i;
 const WAIT_SILENT =
   /^(.+?)\s+(?:still\s+)?(?:hasn'?t|has not|haven'?t|have not|never)\s+(?:replied|responded|answered|confirmed|called back|written back|gotten back|got back|sent (?:it|them|that|the \w+)|emailed back)(?:\s+to me)?(?:\s+(about|on|re)\s+(.+))?$/i;
 
@@ -143,7 +151,7 @@ export function findWaiting(fragment: string): { who: string; title: string; phr
     return { who, title: `Hear back from ${who}${m[3] ? ` ${m[2]} ${tidy(m[3])}` : ""}`, phrase: m[0] };
   }
   m = f.match(WAIT_FOR);
-  if (m) {
+  if (m && !OWN_TASK_AFTER.test(m[1])) {
     const who = tidy(m[1]);
     // "waiting on Dana" reads better as "Hear back from Dana"; "waiting for the refund" stays "The refund".
     const title = m[2] ? `${cap(who)} to ${tidy(m[2])}` : /^[A-Z][a-z]+(?: [A-Z][a-z]+)?$/.test(who) ? `Hear back from ${who}` : cap(who);
@@ -152,6 +160,7 @@ export function findWaiting(fragment: string): { who: string; title: string; phr
   m = f.match(WAIT_SILENT);
   if (m) {
     const raw = tidy(m[1].replace(/^(?:and|but|so)\s+/i, ""));
+    if (SELF.test(raw)) return undefined; // "I haven't replied" is your own task
     const who = PRONOUN.test(raw) ? "someone" : raw;
     return { who, title: `Hear back from ${PRONOUN.test(raw) ? "them" : who}${m[3] ? ` ${m[2]} ${tidy(m[3])}` : ""}`, phrase: m[0] };
   }
@@ -174,7 +183,7 @@ function classify(fragment: string): SuggestionKind {
 }
 
 export function cleanTitle(fragment: string, datePhrase?: string, repeatPhrase?: string): string {
-  let t = without(fragment.trim(), repeatPhrase).replace(LEAD_FILLERS, "");
+  let t = without(fragment.trim(), repeatPhrase).replace(/^[\s,;:–-]+/, "").replace(LEAD_FILLERS, "");
   t = t.replace(LEAD_INTENT, "");
   t = t.replace(/^(?:i\s+)?(?:need|have)\s+/i, (s) => (/(need|have) to/i.test(s) ? "" : s));
   if (datePhrase) {
@@ -200,7 +209,10 @@ export function parseBrainDump(text: string, now: Date, threads: ThreadLike[] = 
     const due = findDate(source, now);
     const vague = due ? undefined : source.match(VAGUE)?.[0];
     const repeat = findRepeat(source);
-    const waiting = findWaiting(source);
+    const found = findWaiting(source);
+    // "waiting for Friday" names a day, not a person: once the date is taken out, nobody is left.
+    const who = found && tidy(without(found.who, due?.phrase));
+    const waiting = found && who ? { ...found, who } : undefined;
     const kind = waiting && !REMINDER.test(source) ? "task" : classify(source);
     const title = waiting ? cleanTitle(waiting.title, due?.phrase, repeat?.phrase) : cleanTitle(source, due?.phrase, repeat?.phrase);
     return {
@@ -211,7 +223,7 @@ export function parseBrainDump(text: string, now: Date, threads: ThreadLike[] = 
       ...(due && { due }),
       ...(vague && { timeHint: vague.toLowerCase() }),
       ...(repeat && { repeat }),
-      ...(waiting && { waiting: { who: tidy(without(waiting.who, due?.phrase)), phrase: waiting.phrase } }),
+      ...(waiting && { waiting: { who: waiting.who, phrase: waiting.phrase } }),
       threadId: suggest(source, threads),
     };
   });

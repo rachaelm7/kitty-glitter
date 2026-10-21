@@ -140,3 +140,29 @@ describe("waiting on others", () => {
     });
   });
 });
+
+describe("review fixes: no false waits or repeats", () => {
+  it("doesn't treat a passing mention of waiting as the task", () => {
+    expect(findWaiting("Call the dentist while waiting for the results")).toBeUndefined();
+    expect(findWaiting("I'm waiting for the bus and need to call mom")).toBeUndefined();
+    expect(findWaiting("I haven't replied to Dana")).toBeUndefined();
+  });
+  it("drops a wait that only names a day", () => {
+    const [s] = parseBrainDump("Still waiting for Friday", now);
+    expect(s.waiting).toBeUndefined();
+  });
+  it("reads daily/monthly only as a repeat, not an adjective", () => {
+    expect(findRepeat("buy a monthly pass")).toBeUndefined();
+    expect(findRepeat("cancel the daily newspaper")).toBeUndefined();
+    expect(findRepeat("pay rent monthly.")?.days).toBe(30);
+    expect(findRepeat("check the meter every 30 days")?.days).toBe(30);
+  });
+  it("leaves no stray punctuation where a repeat was", () => {
+    expect(parseBrainDump("Every other day, take vitamins", now)[0].title).toBe("Take vitamins");
+  });
+  it("stays fast on long repetitive input", () => {
+    const t = performance.now();
+    findWaiting("i'm ".repeat(5000) + "waiting");
+    expect(performance.now() - t).toBeLessThan(50);
+  });
+});

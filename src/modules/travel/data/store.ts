@@ -1,11 +1,11 @@
 "use client";
 
-import { createStore } from "@/core/store/createStore";
+import { createStore, shiftChanged } from "@/core/store/createStore";
 import { SEED_TRIPS } from "./mock";
 import type { PackItem, Reservation, Trip } from "./types";
 
 export const tripStore = createStore<Trip[]>("trips", SEED_TRIPS, 1, {
-  shift: (ts, d) => ts.map((t) => ({ ...t, startOffset: t.startOffset + d })),
+  shift: shiftChanged(SEED_TRIPS, (t, d) => ({ ...t, startOffset: t.startOffset + d })),
 });
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
