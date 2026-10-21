@@ -12,3 +12,6 @@ next-env.d.ts
 /playwright-report/
 *.pem
 npm-debug.log*
+
+# Throwaway local scripts
+*.tmp.mjs
