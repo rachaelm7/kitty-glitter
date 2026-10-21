@@ -20,3 +20,6 @@ export type Trip = {
   reservations: Reservation[];
   packing: PackItem[];
 };
+
+export const RESERVATION_KINDS: Reservation["kind"][] = ["flight", "stay", "transport", "activity", "dining"];
+export const RESERVATION_LABEL: Record<Reservation["kind"], string> = { flight: "Flight", stay: "Stay", dining: "Dining", activity: "Activity", transport: "Train or transport" };

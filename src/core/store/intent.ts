@@ -7,7 +7,14 @@ import { createStore } from "./createStore";
  * modules can link to each other without importing each other.
  * Kept in memory only.
  */
-export type Intent = { email?: string; task?: string };
+export type Intent = {
+  email?: string;
+  task?: string;
+  appointment?: string;
+  trip?: string;
+  /** Open the "new" form on the screen that owns this kind of item. */
+  create?: "task" | "appointment" | "trip";
+};
 export const intentStore = createStore<Intent>("intent", {}, 1, { persist: false });
 
 export function requestOpen(intent: Intent) {

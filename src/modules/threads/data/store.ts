@@ -5,7 +5,9 @@ import { SEED_THREADS } from "./mock";
 import type { LifeThread, ThreadNote } from "./types";
 
 // v2: threads gained status, stage, next step and timeline.
-export const threadStore = createStore<LifeThread[]>("threads", SEED_THREADS, 2);
+export const threadStore = createStore<LifeThread[]>("threads", SEED_THREADS, 2, {
+  shift: (ts, d) => ts.map((t) => ({ ...t, events: t.events.map((e) => ({ ...e, dayOffset: e.dayOffset + d })) })),
+});
 export const threadNoteStore = createStore<ThreadNote[]>("thread-notes", [], 2);
 
 const PALETTE = ["#9A515D", "#6F5FA0", "#9A7A3F", "#4E7F8C", "#A85F7A"];

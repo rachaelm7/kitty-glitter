@@ -5,8 +5,15 @@ import type { LifeThread } from "@/modules/threads";
 import type { Trip } from "@/modules/travel";
 import type { MaintenanceItem } from "@/modules/home";
 
-export type SearchKind = "page" | "email" | "task" | "thread" | "appointment" | "trip" | "upkeep";
-export type SearchTarget = { type: "href"; href: string } | { type: "email"; id: string } | { type: "task"; id: string };
+export type SearchKind = "page" | "action" | "email" | "task" | "thread" | "appointment" | "trip" | "upkeep";
+export type ActionId = "new-task" | "new-appointment" | "new-trip" | "theme-dark" | "theme-light" | "theme-auto";
+export type SearchTarget =
+  | { type: "href"; href: string }
+  | { type: "email"; id: string }
+  | { type: "task"; id: string }
+  | { type: "appointment"; id: string }
+  | { type: "trip"; id: string }
+  | { type: "action"; action: ActionId; href?: string };
 
 export type SearchItem = {
   /** Stable across sessions, so "recent" can remember it. */
@@ -23,6 +30,7 @@ export type SearchItem = {
 
 export const KIND_LABEL: Record<SearchKind, string> = {
   page: "Page",
+  action: "Action",
   email: "Email",
   task: "Task",
   thread: "Life Thread",
@@ -46,6 +54,41 @@ export const PAGES: SearchItem[] = [
   { id: "page:settings", kind: "page", title: "Settings", subtitle: "Theme, accounts, demo data", keywords: "appearance dark light theme reset", target: { type: "href", href: "/settings" } },
   { id: "page:more", kind: "page", title: "More", subtitle: "Everything else", target: { type: "href", href: "/more" } },
 ];
+
+/** Things you can do from search. Each one only opens a form or changes a setting on this device. */
+export const ACTIONS: SearchItem[] = [
+  { id: "action:new-task", kind: "action", title: "New task", subtitle: "Add a to-do", keywords: "add create todo reminder", target: { type: "action", action: "new-task", href: "/tasks" } },
+  { id: "action:brain-dump", kind: "action", title: "New brain dump", subtitle: "Type or talk it all out", keywords: "add capture note thoughts", target: { type: "href", href: "/capture" } },
+  { id: "action:new-appointment", kind: "action", title: "New appointment", subtitle: "Track a visit, referral or test", keywords: "add create doctor dentist booking", target: { type: "action", action: "new-appointment", href: "/appointments" } },
+  { id: "action:new-trip", kind: "action", title: "New trip", subtitle: "Plan bookings and packing", keywords: "add create travel holiday", target: { type: "action", action: "new-trip", href: "/travel" } },
+  { id: "action:theme-dark", kind: "action", title: "Dark theme", subtitle: "Switch the app to dark", keywords: "appearance night mode", target: { type: "action", action: "theme-dark" } },
+  { id: "action:theme-light", kind: "action", title: "Light theme", subtitle: "Switch the app to light", keywords: "appearance day mode", target: { type: "action", action: "theme-light" } },
+  { id: "action:theme-auto", kind: "action", title: "Match device theme", subtitle: "Follow your phone's light or dark setting", keywords: "appearance automatic system", target: { type: "action", action: "theme-auto" } },
+];
+
+/** Shorthands you can type before a search: "#email dentist", "#trip". */
+export const KIND_ALIASES: Record<string, SearchKind> = {
+  email: "email", emails: "email", mail: "email", inbox: "email",
+  task: "task", tasks: "task", todo: "task",
+  thread: "thread", threads: "thread",
+  appt: "appointment", appointment: "appointment", appointments: "appointment",
+  trip: "trip", trips: "trip", travel: "trip",
+  home: "upkeep", upkeep: "upkeep",
+  page: "page", pages: "page",
+  action: "action", actions: "action",
+};
+
+export type ParsedQuery = { text: string; kind?: SearchKind };
+
+/** "> new" → actions only; "#task dentist" → tasks matching "dentist"; otherwise everything. */
+export function parseQuery(raw: string): ParsedQuery {
+  const q = raw.trimStart();
+  if (q.startsWith(">")) return { text: q.slice(1).trim(), kind: "action" };
+  const m = q.match(/^#([\p{L}]+)(?:\s+|$)/u);
+  const kind = m && KIND_ALIASES[m[1].toLowerCase()];
+  if (m && kind) return { text: q.slice(m[0].length).trim(), kind };
+  return { text: q.trim() };
+}
 
 export type SearchSources = {
   messages: Message[];
@@ -80,7 +123,7 @@ export function queryTokens(query: string) {
 }
 
 export function buildIndex(src: SearchSources): SearchItem[] {
-  const items: SearchItem[] = [...PAGES];
+  const items: SearchItem[] = [...PAGES, ...ACTIONS];
 
   for (const m of src.messages) {
     const archived = !!src.archived[m.id];
@@ -125,7 +168,7 @@ export function buildIndex(src: SearchSources): SearchItem[] {
       subtitle: a.provider,
       keywords: `${a.referredBy ?? ""} ${a.status.replace("-", " ")}`,
       boost: a.status === "completed" ? -8 : 3,
-      target: { type: "href", href: "/appointments" },
+      target: { type: "appointment", id: a.id },
     });
   }
   for (const tr of src.trips) {
@@ -135,7 +178,8 @@ export function buildIndex(src: SearchSources): SearchItem[] {
       title: tr.name,
       subtitle: tr.destination,
       keywords: tr.reservations.map((r) => `${r.title} ${r.confirmation}`).join(" "),
-      target: { type: "href", href: "/travel" },
+      boost: tr.startOffset + tr.nights < 0 ? -6 : 2,
+      target: { type: "trip", id: tr.id },
     });
   }
   for (const u of src.upkeep) {
@@ -170,11 +214,12 @@ function scoreToken(p: Prepared, token: string): number {
 }
 
 /** Every typed word must match somewhere; results are ordered by match quality, then boost. */
-export function rank(index: SearchItem[], query: string, limit = 30): SearchItem[] {
+export function rank(index: SearchItem[], query: string, limit = 30, kind?: SearchKind): SearchItem[] {
   const tokens = queryTokens(query);
   if (tokens.length === 0) return [];
   const scored: { item: SearchItem; score: number }[] = [];
   for (const p of prepare(index)) {
+    if (kind && p.item.kind !== kind) continue;
     let score = 0;
     let ok = true;
     for (const t of tokens) {
@@ -197,4 +242,11 @@ export function defaultResults(index: SearchItem[], recentIds: string[], limit =
   const seen = new Set(recents.map((r) => r.id));
   const pages = ["page:today", "page:inbox", "page:tasks", "page:threads", "page:capture"].map((id) => byId.get(id)).filter((i): i is SearchItem => !!i && !seen.has(i.id));
   return [...recents, ...pages].slice(0, limit);
+}
+
+/** A filter with nothing typed lists that kind, most relevant first (actions keep their set order). */
+export function browse(index: SearchItem[], kind: SearchKind, limit = 30): SearchItem[] {
+  const items = index.filter((i) => i.kind === kind);
+  if (kind === "action" || kind === "page") return items.slice(0, limit);
+  return items.sort((a, b) => (b.boost ?? 0) - (a.boost ?? 0) || a.title.localeCompare(b.title)).slice(0, limit);
 }

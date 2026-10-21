@@ -132,10 +132,11 @@ export function TasksScreen() {
       )}
 
       <TaskSheet
-        mode={sheet?.kind === "new" ? { kind: "new" } : editing ? { kind: "edit", task: editing } : null}
+        mode={sheet?.kind === "new" || intent.create === "task" ? { kind: "new" } : editing ? { kind: "edit", task: editing } : null}
         onClose={() => {
           setSheet(null);
           clearIntent("task");
+          if (intent.create === "task") clearIntent("create");
         }}
       />
     </div>

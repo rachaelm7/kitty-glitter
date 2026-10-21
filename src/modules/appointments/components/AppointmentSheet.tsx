@@ -9,22 +9,39 @@ import { useToast } from "@/core/ui/Toast";
 import { nextActions, officeDraft } from "../data/logic";
 import { setStatus } from "../data/store";
 import { STATUSES, STATUS_LABEL, type Appointment } from "../data/types";
+import { AppointmentForm } from "./AppointmentForm";
 import { NotMedicalAdvice } from "./Disclaimer";
 import { Stepper } from "./Progress";
 import { StatusPill } from "./StatusPill";
 
-export function AppointmentSheet({ appt, onClose }: { appt: Appointment | null; onClose: () => void }) {
+export type SheetMode = { kind: "view"; id: string } | { kind: "edit"; id: string } | { kind: "new" };
+
+export function AppointmentSheet({
+  mode,
+  list,
+  onChange,
+}: {
+  mode: SheetMode | null;
+  list: Appointment[];
+  onChange: (next: SheetMode | null) => void;
+}) {
+  const appt = mode && mode.kind !== "new" ? list.find((a) => a.id === mode.id) : undefined;
+  const open = mode?.kind === "new" || !!appt;
+  const close = () => onChange(null);
   return (
-    <Sheet open={!!appt} onClose={onClose} title={appt?.title ?? "Appointment"}>
-      {appt && <Detail key={appt.id + appt.status} a={appt} />}
+    <Sheet open={open} onClose={close} title={mode?.kind === "new" ? "New appointment" : (appt?.title ?? "Appointment")}>
+      {mode?.kind === "new" && <AppointmentForm key="new" onDone={(id) => onChange(id ? { kind: "view", id } : null)} />}
+      {mode?.kind === "edit" && appt && <AppointmentForm key={`edit-${appt.id}`} appt={appt} onDone={(id) => onChange(id ? { kind: "view", id } : null)} />}
+      {mode?.kind === "view" && appt && <Detail key={appt.id + appt.status} a={appt} onEdit={() => onChange({ kind: "edit", id: appt.id })} />}
     </Sheet>
   );
 }
 
-function Detail({ a }: { a: Appointment }) {
+function Detail({ a, onEdit }: { a: Appointment; onEdit: () => void }) {
   const now = useNow();
   const toast = useToast();
   const actions = nextActions(a);
+  const contact = a.contact ? <span className="text-muted">{a.contact}</span> : null;
   const [draft, setDraft] = useState(() => officeDraft(a));
 
   return (
@@ -32,10 +49,14 @@ function Detail({ a }: { a: Appointment }) {
       <p className="text-sm text-muted">{a.kind === "referral" ? "Referral" : a.kind === "test" ? "Test" : "Visit"}</p>
       <h3 className="pr-12 text-xl leading-snug">{a.title}</h3>
       <p className="mt-1 text-sm">
-        {a.provider} · <span className="text-muted">{a.contact} (fictional)</span>
+        {a.provider}
+        {contact && <> · {contact}</>}
       </p>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         <StatusPill status={a.status} attention={actions.some((x) => x.urgent)} />
+        <Button size="sm" variant="ghost" onClick={onEdit}>
+          <Icon.Pencil width={16} height={16} /> Edit details
+        </Button>
       </div>
       {a.when && (
         <p className="mt-3 flex items-center gap-2 text-sm font-semibold">

@@ -6,7 +6,9 @@ import { completeInList, openLinked, reopenInList } from "./recur";
 import type { Task, TaskCategory } from "./types";
 
 // v3: tasks gained repeats and links to Home upkeep.
-export const taskStore = createStore<Task[]>("tasks", SEED_TASKS, 3);
+export const taskStore = createStore<Task[]>("tasks", SEED_TASKS, 3, {
+  shift: (ts, d) => ts.map((t) => (t.dueDayOffset === undefined ? t : { ...t, dueDayOffset: t.dueDayOffset + d })),
+});
 
 let counter = 0;
 export function newTaskId() {
