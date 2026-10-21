@@ -2,13 +2,25 @@ import { expect, test as base, type Page } from "@playwright/test";
 
 /** Every test starts from the fictional sample data (cleared once per tab, kept across reloads). */
 export const test = base.extend({
-  page: async ({ page }, run) => {
+  page: async ({ page, browserName }, run) => {
+    // E2E_CPU_THROTTLE=6 imitates a slow CI machine, to flush out tests that race the page's start-up.
+    if (process.env.E2E_CPU_THROTTLE && browserName === "chromium") {
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Emulation.setCPUThrottlingRate", { rate: Number(process.env.E2E_CPU_THROTTLE) });
+    }
     await page.addInitScript(() => {
       if (!sessionStorage.getItem("kg-test")) {
         localStorage.clear();
         sessionStorage.setItem("kg-test", "1");
       }
     });
+    // After each page load, wait until the app is running in the browser, so the first key press isn't lost.
+    const goto = page.goto.bind(page);
+    page.goto = (async (url, options) => {
+      const response = await goto(url, options);
+      await page.locator("html[data-ready]").waitFor({ state: "attached" });
+      return response;
+    }) as typeof page.goto;
     await run(page);
   },
 });

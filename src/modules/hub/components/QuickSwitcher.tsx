@@ -44,6 +44,7 @@ export default function QuickSwitcher() {
     <dialog
       ref={dialogRef}
       aria-label="Search everything"
+      onCancel={closeSearch} // Escape: update our state right away, not a tick later when "close" fires
       onClose={closeSearch}
       onClick={(e) => {
         if (e.target === dialogRef.current) closeSearch();

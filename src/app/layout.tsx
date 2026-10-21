@@ -4,6 +4,7 @@ import { AppShell } from "@/core/ui/AppShell";
 import { SearchHost } from "@/modules/hub";
 import { ToastProvider } from "@/core/ui/Toast";
 import { RegisterServiceWorker } from "@/core/pwa/RegisterServiceWorker";
+import { ReadyMarker } from "@/core/ui/ReadyMarker";
 import { themeScript } from "@/core/theme/theme";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <AppShell extras={<SearchHost />}>{children}</AppShell>
         </ToastProvider>
         <RegisterServiceWorker />
+        <ReadyMarker />
       </body>
     </html>
   );
