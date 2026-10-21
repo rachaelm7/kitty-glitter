@@ -10,6 +10,7 @@ test("Today widgets can be hidden, shown and reordered, and it persists", async 
   await sheet.getByRole("switch", { name: "Show Today's agenda" }).click();
   await sheet.getByRole("switch", { name: "Show Unread by account" }).click();
   await sheet.getByRole("button", { name: "Move Three priorities up" }).click();
+  await sheet.getByRole("button", { name: "Move Three priorities up" }).click();
   await sheet.getByRole("button", { name: "Done" }).click();
 
   await expect(page.getByRole("region", { name: "Today" })).toHaveCount(0);

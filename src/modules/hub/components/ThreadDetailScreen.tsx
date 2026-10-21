@@ -14,6 +14,7 @@ import { markRead } from "@/modules/email";
 import { toggleTask } from "@/modules/tasks";
 import { addThreadNote, removeThreadNote, threadStore, updateThread } from "@/modules/threads";
 import { buildThreadView, type TimelineItem } from "../data/threadView";
+import { deriveThreadState } from "../data/threadState";
 import { StagePill } from "./StagePill";
 import { useThreadSources } from "./useThreadSources";
 
@@ -45,6 +46,7 @@ export function ThreadDetailScreen({ id }: { id: string }) {
   }
 
   const v = buildThreadView(thread, src);
+  const st = deriveThreadState(thread, src.tasks, src.now);
   const I = Icon[thread.icon];
   const done = thread.stage === "done";
 
@@ -70,32 +72,53 @@ export function ThreadDetailScreen({ id }: { id: string }) {
           <p className="mt-1 text-muted">{thread.blurb}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <StagePill stage={thread.stage} />
-            <span className="text-sm font-semibold">{done ? "Wrapped up" : thread.status}</span>
+            <span className="text-sm font-semibold">{done ? "Wrapped up" : st.status}</span>
           </div>
         </div>
       </header>
 
       {!done && (
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {thread.next && (
-            <div className="rounded-[22px] bg-accent p-4 text-accent-ink shadow-soft">
-              <p className="text-xs font-bold tracking-wide uppercase opacity-90">Next step</p>
-              <p className="mt-1 text-lg font-semibold">{thread.next.label}</p>
-              {(thread.next.emailId || thread.next.taskId) && (
-                <button
-                  type="button"
-                  onClick={() => (thread.next!.emailId ? openEmail(thread.next!.emailId) : openTask(thread.next!.taskId!))}
-                  className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-ink/20 px-3 text-sm font-semibold"
-                >
-                  {thread.next.emailId ? "Open the email" : "Open the task"} <Icon.Chevron width={16} height={16} />
-                </button>
-              )}
+          {st.allDone ? (
+            <div className="rounded-[22px] bg-accent-soft p-4 sm:col-span-2" data-testid="all-done">
+              <p className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-accent uppercase">
+                <Icon.Cat width={16} height={16} /> All caught up
+              </p>
+              <p className="mt-1 text-lg font-semibold">Every task in this thread is finished.</p>
+              <Button
+                className="mt-3"
+                onClick={() => {
+                  updateThread(thread.id, { stage: "done" });
+                  toast("Thread wrapped up", { label: "Undo", onClick: () => updateThread(thread.id, { stage: thread.stage }) });
+                }}
+              >
+                <Icon.Check width={16} height={16} /> Wrap up this thread
+              </Button>
             </div>
+          ) : (
+            <>
+              {st.next && (
+                <div className="rounded-[22px] bg-accent p-4 text-accent-ink shadow-soft">
+                  <p className="text-xs font-bold tracking-wide uppercase opacity-90">Next step</p>
+                  <p className="mt-1 text-lg font-semibold">{st.next.label}</p>
+                  {st.advanced && <p className="mt-1 text-xs opacity-90">Moved on automatically as you finished tasks.</p>}
+                  {(st.next.emailId || st.next.taskId) && (
+                    <button
+                      type="button"
+                      onClick={() => (st.next!.emailId ? openEmail(st.next!.emailId) : openTask(st.next!.taskId!))}
+                      className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-ink/20 px-3 text-sm font-semibold"
+                    >
+                      {st.next.emailId ? "Open the email" : "Open the task"} <Icon.Chevron width={16} height={16} />
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="rounded-[22px] bg-lavender-soft p-4">
+                <p className="text-xs font-bold tracking-wide text-lavender uppercase">Waiting on</p>
+                <p className="mt-1 font-semibold">{st.waitingOn ?? "Nobody. The next move is yours."}</p>
+              </div>
+            </>
           )}
-          <div className="rounded-[22px] bg-lavender-soft p-4">
-            <p className="text-xs font-bold tracking-wide text-lavender uppercase">Waiting on</p>
-            <p className="mt-1 font-semibold">{thread.waitingOn ?? "Nobody. The next move is yours."}</p>
-          </div>
         </div>
       )}
 

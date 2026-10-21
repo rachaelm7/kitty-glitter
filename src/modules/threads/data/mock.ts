@@ -12,9 +12,8 @@ export const SEED_THREADS: LifeThread[] = [
   {
     id: "t-car", name: "Auto insurance renewal", color: "#4E7F8C", icon: "Wallet",
     blurb: "Sample policy renews in two weeks", status: "Renews in 14 days", stage: "waiting",
-    waitingOn: "Harborline to send a higher-deductible quote",
     next: { label: "Compare the quote when it arrives", taskId: "k3" },
-    events: [{ id: "e1", dayOffset: 0, label: "You asked Harborline for a higher-deductible quote (by phone)", kind: "update" }],
+    events: [{ id: "e1", dayOffset: -1, label: "You asked Harborline for a higher-deductible quote (by phone)", kind: "update" }],
     keywords: ["car", "insurance", "policy", "renewal", "harborline", "oil change", "tires"],
   },
   {
@@ -37,7 +36,6 @@ export const SEED_THREADS: LifeThread[] = [
   {
     id: "t-return", name: "Lamp return & refund", color: "#7D5F31", icon: "Star",
     blurb: "Returning a table lamp to Lumen & Loom", status: "Return approved", stage: "action",
-    waitingOn: "Refund, 5–7 days after the lamp arrives back",
     next: { label: "Drop off the lamp", taskId: "k6" },
     events: [{ id: "e1", dayOffset: -4, label: "You requested a return: the shade arrived cracked", kind: "update" }],
     keywords: ["lamp", "return", "refund", "lumen", "loom", "order"],

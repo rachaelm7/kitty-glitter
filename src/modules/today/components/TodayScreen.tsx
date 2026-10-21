@@ -13,6 +13,7 @@ import { layoutStore } from "../data/store";
 import { CustomizeSheet } from "./CustomizeSheet";
 import { AgendaWidget } from "./widgets/Agenda";
 import { BriefWidget } from "./widgets/Brief";
+import { ChangesWidget } from "./widgets/Changes";
 import { AppointmentsWidget, EmailWidget, TasksWidget, ThreadsWidget } from "./widgets/Glance";
 import { PromosWidget, UnreadWidget } from "./widgets/Mail";
 import { TripWidget, UpkeepWidget } from "./widgets/Modules";
@@ -21,6 +22,7 @@ import { UpcomingWidget } from "./widgets/Upcoming";
 
 const COMPONENTS: Record<WidgetId, ComponentType> = {
   brief: BriefWidget,
+  changes: ChangesWidget,
   priorities: PrioritiesWidget,
   appointments: AppointmentsWidget,
   tasks: TasksWidget,

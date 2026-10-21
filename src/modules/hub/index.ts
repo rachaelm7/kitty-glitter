@@ -5,3 +5,7 @@ export { StagePill } from "./components/StagePill";
 export { buildThreadView } from "./data/threadView";
 export { useThreadSources } from "./components/useThreadSources";
 export { MoreScreen } from "./components/MoreScreen";
+export { useChanges } from "./components/useChanges";
+export { buildChanges, summarizeChanges } from "./data/changes";
+export type { Change } from "./data/changes";
+export { deriveThreadState } from "./data/threadState";

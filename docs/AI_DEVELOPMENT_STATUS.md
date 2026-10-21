@@ -3,6 +3,35 @@
 Living log of what Claude Code has built, how it was checked, and what is still open.
 Newest increment first. Updated in every PR.
 
+## Latest session: the next three improvements (branch `claude/next-three`)
+
+### What improved
+1. **Inbox swipe actions and keyboard shortcuts.**
+   - **Touch:** swipe a row right to mark read/unread, left to archive (simulated, with Undo). It's touch and pen only, so mouse users keep normal text selection. Vertical scrolling is untouched, and a short or slow swipe does nothing. The row's regular buttons remain the accessible route to the same actions.
+   - **Desktop:** J/K (or arrows) move a visible selection, Enter opens, **E** archives (the selection moves to the neighbouring message), **U** toggles read, **/** jumps to search. Shortcuts are ignored while you type or when a sheet is open.
+2. **Recurring tasks shared with Home upkeep.**
+   - Any task can **repeat** (weekly to yearly) from its details. Finishing it adds the next one, due that many days *after you finished*, and Undo takes it back, so there's never a duplicate.
+   - Furnace filter, smoke detectors and gutters are **linked** to Home upkeep. Finishing the task updates Home, and **Mark done on Home** completes the task and schedules the next one. Home's due dates are now date-based, so they no longer drift between days, and they're derived from your tasks: reopen a task and Home reverts by itself.
+3. **"Since yesterday" and live thread next steps.**
+   - A Today card (and a line in the brief) lists what changed: new mail that needs you, thread and appointment updates, tasks you finished, and what you're waiting on. Each line opens its email or thread, and nothing is invented.
+   - A Life Thread's **next step and "waiting on" now follow its tasks.** Finish the written step and it moves to the next open task. With none left it says "All caught up" and offers to wrap the thread up. Waiting follows waiting tasks.
+
+### What was tested (all run in this session)
+- Lint, typecheck and production build: pass.
+- Unit tests (Vitest): **79 passing.** New ones cover the swipe rules, keyboard focus, recurrence (no duplicates after undo), Home sharing state with tasks, the change builder, and thread next-step derivation.
+- End-to-end (Playwright, iPhone 13 and 1280px desktop, CI settings): **123 passing, 3 skipped by design** (touch-only tests skip on desktop, keyboard tests skip on phones). New flows: real touch swipes (and that vertical scroll isn't hijacked), every keyboard shortcut, repeat → complete → next appears → Home agrees → undo, Mark done from Home, set-repeat-from-details, Since yesterday lines opening their sources, next step advancing then offering to wrap up, and waiting following waiting tasks. The axe WCAG 2.1 A/AA checks on all 16 screens still pass.
+- Screenshots reviewed at iPhone size, including mid-swipe.
+
+### Known gaps
+- Swipe has no haptics on iPhone (Safari doesn't expose vibration); it vibrates on Android only.
+- "Since yesterday" looks back one day from sample data (relative offsets), so it's fixed for the demo rather than tracking real history.
+- A repeating task's rule can be edited, but changing a *linked* task's repeat doesn't change the Home schedule's interval.
+
+### Next three highest-value improvements
+1. **Global search and a quick switcher** (⌘K / a search button on phones) across emails, tasks, threads and appointments, with recent items and jump-to.
+2. **Create and edit appointments and trips** (add a referral, move a booking, mark results received) so those sections aren't read-only demos, linked to Life Threads and to Tasks.
+3. **Smarter Brain Dump:** understand repeats ("every month") and waiting ("waiting on Dana to reply") so captured thoughts become repeating or Waiting-on tasks, still reviewed before anything is added.
+
 ## Latest session: Kitty Glitter v2 (branch `claude/kitty-glitter-v2`)
 One PR to `main` that contains everything (it builds on #1–#7, so merging it alone is enough).
 
@@ -57,7 +86,7 @@ One PR to `main` that contains everything (it builds on #1–#7, so merging it a
 - **More overflowed on iPhone:** the "Also here" rows were 20px wider than the screen, so the page zoomed out and the tab bar became hard to tap. Fixed, and the no-horizontal-scroll test now measures the real device width: the old check compared against `innerWidth`, which grows with the overflow, so it couldn't catch this.
 - **Past agenda items and completed tasks failed contrast** (they were faded with opacity). They now use the muted text colour. This only showed up after mid-morning, which is why the first runs passed.
 
-### Next three highest-value improvements
+### Next three highest-value improvements (all three built in the session above)
 1. **Swipe actions on Inbox rows** (archive / mark read) with haptic-style feedback on iPhone, plus keyboard shortcuts on desktop.
 2. **Recurring tasks and reminders** (for example "every 90 days" for the furnace filter), shared with Home upkeep so Mark done in one place updates the other.
 3. **A smarter brief and Life Thread "what changed"**: show what moved since yesterday (new emails in a thread, replies you're waiting on) and let the next step update when its task is done.
