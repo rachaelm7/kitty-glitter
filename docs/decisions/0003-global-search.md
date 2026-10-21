@@ -40,3 +40,9 @@ app/layout.tsx              mounts <SearchHost/> through AppShell's `extras` slo
 
 ## Consequences
 New modules appear in search by adding a few lines to `buildIndex`. If data grows into the thousands, ranking would move to a precomputed index or the server in a later phase.
+
+## Notes from review (Reviewer role)
+- Opening an email from search also marks it read, the same as opening it in the Inbox. Read state is local to the device.
+- Unit tests for modules import sample data from `modules/<x>/data/mock` directly (as the existing hub tests do). That is the one deliberate exception to "import through `index.ts`", limited to tests.
+- Text matching is Unicode-aware (any script), folds accents and a few non-decomposing Latin letters, and caps a query at 8 distinct words and 120 characters.
+- The mobile search button sits in the demo banner. The banner is checked at 320px wide so it stays on one line.

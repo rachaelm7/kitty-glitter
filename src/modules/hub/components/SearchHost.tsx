@@ -5,8 +5,11 @@ import { useEffect, useState } from "react";
 import { useStore } from "@/core/store/createStore";
 import { openSearch, closeSearch, searchStore } from "@/core/store/search";
 
+// One shared import, so the idle preload and the first open use the same downloaded chunk.
+const loadSwitcher = () => import("./QuickSwitcher");
+
 // The dialog and its search code load on first use, not with the page.
-const QuickSwitcher = dynamic(() => import("./QuickSwitcher"), { ssr: false });
+const QuickSwitcher = dynamic(loadSwitcher, { ssr: false });
 
 /** Always mounted and tiny: listens for ⌘K / Ctrl+K and loads the dialog when it's first needed. */
 export function SearchHost() {
@@ -30,9 +33,13 @@ export function SearchHost() {
 
   // Warm the download when the browser is idle so the first open feels instant.
   useEffect(() => {
-    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
-    const id = idle ? idle(() => void import("./QuickSwitcher")) : window.setTimeout(() => void import("./QuickSwitcher"), 2000);
-    return () => (idle ? undefined : window.clearTimeout(id));
+    const warm = () => void loadSwitcher();
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warm);
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(warm, 2000);
+    return () => window.clearTimeout(id);
   }, []);
 
   return wanted ? <QuickSwitcher /> : null;

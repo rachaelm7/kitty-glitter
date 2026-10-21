@@ -5,7 +5,7 @@ import { SEED_MAINTENANCE } from "@/modules/home/data/mock";
 import { SEED_TASKS } from "@/modules/tasks/data/mock";
 import { SEED_THREADS } from "@/modules/threads/data/mock";
 import { SEED_TRIPS } from "@/modules/travel/data/mock";
-import { buildIndex, defaultResults, normalize, rank, type SearchSources } from "./search";
+import { MAX_QUERY_WORDS, buildIndex, defaultResults, normalize, queryTokens, rank, type SearchSources } from "./search";
 
 const src: SearchSources = { messages: MESSAGES, archived: {}, read: {}, tasks: SEED_TASKS, threads: SEED_THREADS, appointments: SEED_APPOINTMENTS, trips: SEED_TRIPS, upkeep: SEED_MAINTENANCE };
 const index = buildIndex(src);
@@ -14,6 +14,18 @@ const ids = (q: string, limit?: number) => rank(index, q, limit).map((r) => r.id
 describe("normalize", () => {
   it("ignores case, accents and punctuation", () => {
     expect(normalize("  Maré   Alta! ")).toBe("mare alta");
+  });
+  it("folds letters that don't decompose, and keeps other scripts", () => {
+    expect(normalize("Søren Łukasz Straße")).toBe("soren lukasz strasse");
+    expect(normalize("日本 Привет")).toBe("日本 привет");
+  });
+  it("de-duplicates and caps the words in a query", () => {
+    expect(queryTokens("faucet faucet FAUCET")).toEqual(["faucet"]);
+    expect(queryTokens("a b c d e f g h i j k")).toHaveLength(MAX_QUERY_WORDS);
+  });
+  it("finds text written in another script", () => {
+    const idx = buildIndex({ ...src, tasks: [{ id: "x", title: "Buy 日本茶 for Priya", status: "open", category: "Errands", createdAt: 1 }] });
+    expect(rank(idx, "日本茶")[0].id).toBe("task:x");
   });
 });
 

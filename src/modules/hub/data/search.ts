@@ -16,7 +16,7 @@ export type SearchItem = {
   subtitle?: string;
   /** Extra words that should find it but aren't shown. */
   keywords?: string;
-  /** Small nudge up or down; never enough to beat a better text match. */
+  /** Small nudge up or down. It breaks ties between similar matches; a clearly better text match still wins. */
   boost?: number;
   target: SearchTarget;
 };
@@ -58,15 +58,25 @@ export type SearchSources = {
   upkeep: MaintenanceItem[];
 };
 
-/** Lowercase, strip accents and punctuation: "Maré Alta!" → "mare alta". */
+/** Letters that don't decompose under NFD, folded by hand ("Søren" → "soren", "Straße" → "strasse"). */
+const FOLD: Record<string, string> = { "ø": "o", "ł": "l", "đ": "d", "ß": "ss", "æ": "ae", "œ": "oe" };
+
+/** Lowercase, strip accents and punctuation, keep letters and numbers in any script: "Maré Alta!" → "mare alta". */
 export function normalize(s: string) {
   return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
-    .replace(/[^a-z0-9$ ]+/g, " ")
+    .replace(/[øłđßæœ]/g, (c) => FOLD[c])
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}$ ]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Typed words, de-duplicated and capped so a pasted wall of text can't make ranking slow. */
+export const MAX_QUERY_WORDS = 8;
+export function queryTokens(query: string) {
+  return [...new Set(normalize(query).split(" ").filter(Boolean))].slice(0, MAX_QUERY_WORDS);
 }
 
 export function buildIndex(src: SearchSources): SearchItem[] {
@@ -161,7 +171,7 @@ function scoreToken(p: Prepared, token: string): number {
 
 /** Every typed word must match somewhere; results are ordered by match quality, then boost. */
 export function rank(index: SearchItem[], query: string, limit = 30): SearchItem[] {
-  const tokens = normalize(query).split(" ").filter(Boolean);
+  const tokens = queryTokens(query);
   if (tokens.length === 0) return [];
   const scored: { item: SearchItem; score: number }[] = [];
   for (const p of prepare(index)) {

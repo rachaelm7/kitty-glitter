@@ -159,7 +159,7 @@ function DemoBanner() {
       className="sticky top-0 z-30 border-b border-line bg-champagne-soft/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur"
     >
       <div className="relative flex min-h-8 items-center justify-center lg:min-h-8">
-        <p className="flex items-center justify-center gap-1.5 px-14 text-[11px] font-bold tracking-[0.14em] text-champagne uppercase lg:px-4">
+        <p className="flex items-center justify-center gap-1.5 px-12 text-[10px] font-bold tracking-[0.08em] whitespace-nowrap text-champagne uppercase min-[380px]:text-[11px] min-[380px]:tracking-[0.14em] lg:px-4">
           <Icon.Sparkle width={12} height={12} aria-hidden /> Demo mode — fictional data
         </p>
         <button
