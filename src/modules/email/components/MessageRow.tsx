@@ -1,5 +1,6 @@
 import { Tag, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
+import { SwipeRow } from "@/core/ui/SwipeRow";
 import { relativeDay } from "@/core/date";
 import type { Message } from "../data/types";
 import { AccountDot } from "./AccountDot";
@@ -11,18 +12,38 @@ export function MessageRow({
   now,
   onOpen,
   onArchive,
+  onToggleRead,
   archived,
+  focused,
 }: {
   message: Message;
   unread: boolean;
   now: Date;
   onOpen: () => void;
   onArchive: () => void;
+  onToggleRead?: () => void;
   archived?: boolean;
+  focused?: boolean;
 }) {
   const when = m.receivedDayOffset === 0 ? m.time : relativeDay(m.receivedDayOffset, now);
   return (
-    <li className={cx("group relative flex items-stretch border-b border-line last:border-b-0", m.urgent && "before:absolute before:inset-y-3 before:left-0 before:w-1 before:rounded-full before:bg-urgent")}>
+    <li
+      data-message-id={m.id}
+      aria-current={focused ? "true" : undefined}
+      className={cx(
+        "group relative border-b border-line last:border-b-0",
+        focused && "bg-accent-soft/40 ring-2 ring-accent ring-inset",
+      )}
+    >
+      <SwipeRow
+        onSwipeStart={onToggleRead}
+        onSwipeEnd={onArchive}
+        startLabel={unread ? "Read" : "Unread"}
+        endLabel={archived ? "Move back" : "Archive"}
+        startIcon={unread ? <Icon.MailOpen width={18} height={18} /> : <Icon.Mail width={18} height={18} />}
+        endIcon={archived ? <Icon.Undo width={18} height={18} /> : <Icon.Archive width={18} height={18} />}
+      >
+      <div className={cx("relative flex items-stretch", m.urgent && "before:absolute before:inset-y-3 before:left-0 before:w-1 before:rounded-full before:bg-urgent")}>
       <button type="button" onClick={onOpen} className="min-w-0 flex-1 py-3.5 pr-1 pl-3 text-left transition-colors hover:bg-surface-2/50">
         <span className="flex items-center gap-2 text-sm">
           <span aria-hidden className={cx("size-2 flex-none rounded-full", unread && "bg-ink")} />
@@ -48,6 +69,8 @@ export function MessageRow({
       >
         {archived ? <Icon.Undo width={18} height={18} /> : <Icon.Archive width={18} height={18} />}
       </button>
+      </div>
+      </SwipeRow>
     </li>
   );
 }
