@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+/* Theme tokens: warm ivory and pearl, dusty rose, muted lavender, soft
+   champagne, charcoal text. Light is the default; dark applies via the OS
+   setting (auto) or an explicit data-theme on <html>, set before first paint.
+   Every text/background pair here meets WCAG AA (4.5:1). */
+:root {
+  --bg: #fbf8f3;
+  --surface: #ffffff;
+  --surface-2: #f4eee7;
+  --ink: #2e2a2b;
+  --muted: #6a6064;
+  --line: #ebe3db;
+  --accent: #9a515d;
+  --accent-ink: #ffffff;
+  --accent-soft: #f7e9ea;
+  --lavender: #6f5fa0;
+  --lavender-soft: #efebf6;
+  --champagne: #7d5f31;
+  --champagne-soft: #f6eee1;
+  --urgent: #a32e50;
+  --urgent-ink: #ffffff;
+  --urgent-soft: #fbe7ec;
+  --scrim: rgb(46 34 38 / 0.38);
+  --shadow-color: 60 40 44;
+  --shadow-strength: 0.07;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1a1c;
+    --surface: #262225;
+    --surface-2: #302b2e;
+    --ink: #f4eee9;
+    --muted: #bbb0ae;
+    --line: #3b3538;
+    --accent: #e6aab3;
+    --accent-ink: #2b171b;
+    --accent-soft: #3b2a2f;
+    --lavender: #c3b7e6;
+    --lavender-soft: #2e2a3a;
+    --champagne: #e1c79b;
+    --champagne-soft: #352e25;
+    --urgent: #f4a0b5;
+    --urgent-ink: #2a0f18;
+    --urgent-soft: #46242f;
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow-color: 0 0 0;
+    --shadow-strength: 0.35;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #1d1a1c;
+  --surface: #262225;
+  --surface-2: #302b2e;
+  --ink: #f4eee9;
+  --muted: #bbb0ae;
+  --line: #3b3538;
+  --accent: #e6aab3;
+  --accent-ink: #2b171b;
+  --accent-soft: #3b2a2f;
+  --lavender: #c3b7e6;
+  --lavender-soft: #2e2a3a;
+  --champagne: #e1c79b;
+  --champagne-soft: #352e25;
+  --urgent: #f4a0b5;
+  --urgent-ink: #2a0f18;
+  --urgent-soft: #46242f;
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow-color: 0 0 0;
+  --shadow-strength: 0.35;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-urgent: var(--urgent);
+  --color-urgent-ink: var(--urgent-ink);
+  --color-urgent-soft: var(--urgent-soft);
+  --color-scrim: var(--scrim);
+  --color-lavender: var(--lavender);
+  --color-lavender-soft: var(--lavender-soft);
+  --color-champagne: var(--champagne);
+  --color-champagne-soft: var(--champagne-soft);
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  button:not(:disabled), [role="button"] {
+    cursor: pointer;
+  }
+}
+
+/* Soft, warm shadows for cards and floating elements. */
+@utility shadow-soft {
+  box-shadow: 0 1px 2px rgb(var(--shadow-color) / calc(var(--shadow-strength) * 0.6)), 0 8px 24px -6px rgb(var(--shadow-color) / var(--shadow-strength));
+}
+@utility shadow-lift {
+  box-shadow: 0 2px 4px rgb(var(--shadow-color) / calc(var(--shadow-strength) * 0.7)), 0 18px 40px -10px rgb(var(--shadow-color) / calc(var(--shadow-strength) * 1.6));
+}
+
+/* Safe areas for the iPhone notch and home indicator. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Subtle motion, switched off for people who prefer reduced motion. */
+@keyframes kg-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes kg-pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes kg-shimmer {
+  from { background-position: -200px 0; }
+  to { background-position: calc(200px + 100%) 0; }
+}
+@utility animate-rise {
+  animation: kg-rise 0.28s ease-out both;
+}
+@utility animate-pop {
+  animation: kg-pop 0.25s ease-out;
+}
+@utility skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0, var(--line) 50%, var(--surface-2) 100%);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  background-color: var(--surface-2);
+  animation: kg-shimmer 1.2s linear infinite;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sheet entrance: slides up on phones, fades in on larger screens. */
+dialog.kg-sheet[open] {
+  animation: kg-sheet-up 0.26s ease-out;
+}
+dialog.kg-sheet::backdrop {
+  animation: kg-fade 0.2s ease-out;
+}
+@keyframes kg-sheet-up {
+  from { transform: translateY(24px); opacity: 0.6; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes kg-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

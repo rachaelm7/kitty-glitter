@@ -1,0 +1,53 @@
+# Checks every pull request. Read-only token, no secrets: safe for PRs from forks.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # full history so the secret scan sees every commit
+
+      - name: Look for app
+        id: app
+        run: |
+          if [ -f package.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "No package.json yet; nothing to build."; fi
+
+      - uses: actions/setup-node@v6
+        if: steps.app.outputs.present == 'true'
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        if: steps.app.outputs.present == 'true'
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Lint, typecheck, unit tests, build
+        if: steps.app.outputs.present == 'true'
+        run: |
+          npm run --if-present lint
+          npm run --if-present typecheck
+          npm run --if-present test
+          npm run --if-present build
+
+      - name: End-to-end tests (iPhone and desktop sizes)
+        if: steps.app.outputs.present == 'true' && hashFiles('playwright.config.ts') != ''
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test
+
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

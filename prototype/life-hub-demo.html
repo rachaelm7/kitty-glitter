@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Life Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F5F3;--surface:#FFFFFF;--ink:#14302E;--muted:#5B7370;--line:#DCE6E3;
+  --accent:#2B7A74;--accent-ink:#FFFFFF;--accent-soft:#DDEEEB;
+  --urgent:#B63A5C;--urgent-soft:#F8E4EA;--scrim:rgba(10,25,24,.45);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A19;--surface:#152524;--ink:#E4EFEC;--muted:#92AAA6;--line:#243836;
+    --accent:#6CC4BB;--accent-ink:#0B1F1D;--accent-soft:#1B3633;
+    --urgent:#F08FA9;--urgent-soft:#3A1F2A;--scrim:rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A19;--surface:#152524;--ink:#E4EFEC;--muted:#92AAA6;--line:#243836;
+  --accent:#6CC4BB;--accent-ink:#0B1F1D;--accent-soft:#1B3633;
+  --urgent:#F08FA9;--urgent-soft:#3A1F2A;--scrim:rgba(0,0,0,.6);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:104px}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.app{max-width:560px;margin:0 auto;padding:22px 18px 0}
+.view[hidden]{display:none}
+h1,h2,h3{font-family:"Fraunces",Georgia,"Times New Roman",serif;font-weight:600;margin:0;letter-spacing:-.01em}
+h1{font-size:32px;line-height:1.12}
+h2{font-size:21px;margin:30px 0 12px}
+h3{font-size:20px;line-height:1.25}
+.sub{color:var(--muted);margin:6px 0 0}
+.demo{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:600}
+.muted{color:var(--muted)}
+.fine{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+/* Today: brief */
+.brief{margin-top:22px;padding:18px 18px 16px;border-radius:20px;background:var(--accent);color:var(--accent-ink)}
+.brief p{margin:0;font-size:17px;line-height:1.5}
+.brief small{display:block;margin-top:10px;opacity:.8;font-size:13px}
+
+/* Needs you */
+.need{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--urgent-soft);margin-bottom:10px;border-left:5px solid var(--urgent)}
+.need.done{background:transparent;border-left-color:var(--line);opacity:.6}
+.need.done .nt{text-decoration:line-through}
+.chk{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--urgent);background:transparent;display:grid;place-items:center;padding:0}
+.need.done .chk{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.nt{font-weight:600}
+.nw{font-size:14px;color:var(--muted)}
+.when{font-size:13px;font-weight:600;color:var(--urgent)}
+.need.done .when{color:var(--muted)}
+
+/* Agenda */
+.ag{list-style:none;margin:0;padding:0}
+.ag li{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.ag li:last-child{border-bottom:0}
+.ag .t{color:var(--muted);font-size:14px;padding-top:1px}
+.ag li.past{opacity:.5}
+.ag li.now .t{color:var(--accent);font-weight:700}
+.ag b{font-weight:600}
+
+/* Inbox health */
+.bars{display:grid;gap:12px}
+.bar{display:grid;grid-template-columns:128px 1fr 38px;gap:10px;align-items:center;font-size:14px}
+.bar .track{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar .fill{height:100%;border-radius:99px}
+.bar .n{text-align:right;color:var(--muted)}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.cta p{margin:0}
+.btn{border:0;border-radius:12px;padding:10px 16px;min-height:44px;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Upcoming */
+.up{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.up:last-child{border-bottom:0}
+.up .d{font-weight:600;white-space:nowrap}
+
+/* Inbox */
+.search{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);margin-top:16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;margin:0 -18px;padding-left:18px;padding-right:18px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--surface);min-height:40px;font-size:14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
+.seg{display:flex;margin-top:12px;padding:4px;border-radius:14px;background:var(--line)}
+.seg button{flex:1;border:0;background:transparent;border-radius:10px;padding:9px 6px;font-weight:600;color:var(--muted);min-height:40px}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink)}
+.msgs{margin-top:8px}
+.msg{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:14px 2px}
+.msg .l1{display:flex;align-items:center;gap:8px;font-size:14px}
+.msg .l1 b{font-weight:600}
+.msg .l1 .tm{margin-left:auto;color:var(--muted);font-size:13px}
+.msg .s{font-weight:600;margin-top:2px}
+.msg .p{color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg.urg .s{color:var(--urgent)}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;margin-right:6px}
+.tag.urg{background:var(--urgent-soft);color:var(--urgent)}
+.empty{padding:28px 6px;text-align:center;color:var(--muted)}
+.cl{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.cl b{font-weight:600}
+.opts{display:flex;gap:6px;grid-column:1 / -1}
+.opt{flex:1;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 4px;min-height:40px;font-size:13px;font-weight:600}
+.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt.sp[aria-pressed="true"]{background:var(--urgent);border-color:var(--urgent);color:#fff}
+.review{position:sticky;bottom:92px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--ink);color:var(--bg)}
+.review .btn{background:var(--bg);color:var(--ink)}
+
+/* Tasks */
+.addrow{display:flex;gap:8px;margin-top:18px}
+.addrow input{flex:1;min-width:0;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface)}
+.task{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.task .chk{border-color:var(--accent)}
+.task.done{opacity:.55}
+.task.done .chk{background:var(--accent);color:var(--accent-ink)}
+.task.done .tt{text-decoration:line-through}
+
+/* More */
+.mod{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.mod p{margin:0}
+.soon{font-size:13px;color:var(--muted)}
+.on{font-size:13px;font-weight:600;color:var(--accent)}
+
+/* Tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabbar nav{display:flex;max-width:560px;margin:0 auto}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;padding:6px 4px;min-height:56px;font-size:12px;font-weight:600;color:var(--muted);border-radius:14px}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--accent)}
+.tab[aria-current="page"] svg{stroke-width:2.3}
+
+/* Sheet */
+#scrim{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+#scrim.open{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:88vh;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(105%);visibility:hidden;transition:transform .25s ease,visibility .25s}
+#sheet.open{transform:none;visibility:visible}
+#sheet .in{max-width:560px;margin:0 auto}
+#sheet h4{margin:18px 0 4px;font-size:15px;font-weight:700}
+#sheet p{margin:4px 0}
+.x{float:right;width:40px;height:40px;border-radius:50%;border:0;background:var(--line);font-size:22px;line-height:1}
+.due{font-weight:600;color:var(--urgent)}
+textarea{width:100%;min-height:110px;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);resize:vertical}
+.btnrow{display:flex;gap:8px;margin-top:10px}
+.li{padding:6px 0}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);max-width:min(92vw,420px);padding:12px 16px;border-radius:14px;background:var(--ink);color:var(--bg);font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+
+<section id="v-today" class="view">
+  <h1 id="greet">Good day, Juniper</h1>
+  <p class="sub" id="datel"></p>
+  <span class="demo">Demo with sample data</span>
+
+  <div class="brief">
+    <p>Three things need you: renew your auto insurance by Nov 3, confirm Thursday’s appointment, and review the Q4 plan before Friday. Everything else can wait.</p>
+    <small>Morning brief, written by AI from your inbox (sample)</small>
+  </div>
+
+  <h2>Needs you</h2>
+  <div id="needs"></div>
+
+  <h2>Today</h2>
+  <ul class="ag" id="agenda"></ul>
+
+  <h2>Unread by account</h2>
+  <div class="bars" id="bars"></div>
+  <div class="cta">
+    <p><b>46 promotional emails</b><br><span class="muted">from 8 senders, ready to review</span></p>
+    <button class="btn" id="go-clean">Review</button>
+  </div>
+
+  <h2>Coming up</h2>
+  <div id="upcoming"></div>
+</section>
+
+<section id="v-inbox" class="view" hidden>
+  <h1>Inbox</h1>
+  <p class="sub">All five accounts in one place</p>
+  <input class="search" id="q" type="search" placeholder="Search every account" aria-label="Search every account">
+  <div class="chips" id="chips" role="group" aria-label="Filter by account"></div>
+  <div class="seg" role="tablist" aria-label="Inbox view">
+    <button role="tab" data-box="priority" aria-selected="true">Priority</button>
+    <button role="tab" data-box="all" aria-selected="false">Everything</button>
+    <button role="tab" data-box="clean" aria-selected="false">Cleanup</button>
+  </div>
+  <div id="ib-list" class="msgs"></div>
+</section>
+
+<section id="v-tasks" class="view" hidden>
+  <h1>Tasks</h1>
+  <p class="sub">Some were pulled from your email</p>
+  <form class="addrow" id="addf" onsubmit="return false">
+    <input id="newt" placeholder="Add a task" aria-label="New task" autocomplete="off">
+    <button class="btn" id="addb" type="button">Add</button>
+  </form>
+  <div id="tlist"></div>
+</section>
+
+<section id="v-more" class="view" hidden>
+  <h1>More</h1>
+  <p class="sub">Settings and what’s coming next</p>
+  <h2>Appearance</h2>
+  <div class="seg" role="group" aria-label="Theme" id="themeseg">
+    <button data-th="auto" aria-selected="true">Auto</button>
+    <button data-th="light" aria-selected="false">Light</button>
+    <button data-th="dark" aria-selected="false">Dark</button>
+  </div>
+  <h2>Email accounts</h2>
+  <div id="accts"></div>
+  <h2>Modules</h2>
+  <div id="mods"></div>
+  <p class="fine">This is a clickable preview. Nothing here is connected to your real accounts, and nothing is saved.</p>
+</section>
+
+</main>
+
+<div class="tabbar"><nav aria-label="Main">
+  <button class="tab" data-tab="today" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Today</button>
+  <button class="tab" data-tab="inbox"><svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Inbox</button>
+  <button class="tab" data-tab="tasks"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 12.5l3 3 5-6"/></svg>Tasks</button>
+  <button class="tab" data-tab="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>More</button>
+</nav></div>
+
+<div id="scrim"></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-label="Details"><div class="in" id="sh"></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
+
+  var ACCTS={
+    p:{n:'Personal Gmail',c:'#2B7A74',u:142},
+    h:{n:'Hobby Gmail',c:'#7A6CC8',u:38},
+    w:{n:'Work',c:'#C98A1E',u:12},
+    b:{n:'Home and bills',c:'#3E8FD1',u:7},
+    y:{n:'Old Yahoo',c:'#A0728A',u:311}
+  };
+  var CAT_NAMES={bill:'Bill',appt:'Appointment',renew:'Renewal',work:'Work',order:'Order',sec:'Security',pers:'Personal'};
+
+  var MSGS=[
+    {id:1,a:'b',from:'Harbor Auto Insurance',subj:'Your policy renews November 3',pre:'Your premium for the next term is $612. Review before renewal…',tm:'8:12 AM',cat:'renew',act:true,urg:true,
+     sum:'Your auto policy renews on Nov 3 at $612 for six months, up $38 from last term. Autopay will charge the card on file unless you change it.',due:'Nov 3 (in 14 days)',
+     draft:'Hi, I’d like to review my renewal before it processes. Could you send a quote for a higher deductible and any available discounts? Thank you.'},
+    {id:2,a:'p',from:'Bayview Family Practice',subj:'Appointment reminder: Thursday, 3:30 PM',pre:'Please reply C to confirm or call to reschedule…',tm:'7:40 AM',cat:'appt',act:true,urg:true,
+     sum:'Appointment on Thursday at 3:30 PM. The office asks you to confirm by replying today.',due:'Confirm today',
+     draft:'C. I’ll be there Thursday at 3:30 PM. Thank you!'},
+    {id:3,a:'w',from:'Dana Whitfield',subj:'Q4 coverage plan: can you review by Friday?',pre:'Attached is the draft. I mainly need your eyes on staffing…',tm:'Yesterday',cat:'work',act:true,urg:true,
+     sum:'Dana needs your review of the Q4 coverage plan by Friday, mostly the staffing section on page 3. A PDF is attached.',due:'Friday',
+     draft:'Thanks, Dana. I’ll review the staffing section and send comments by Thursday afternoon.'},
+    {id:4,a:'b',from:'Sapphire Card',subj:'Your statement is ready',pre:'Statement balance $1,284.50. Payment due Nov 6…',tm:'Yesterday',cat:'bill',act:true,urg:false,
+     sum:'Statement balance is $1,284.50, due Nov 6. Autopay covers the minimum only, so pay the rest manually to avoid interest.',due:'Nov 6',draft:''},
+    {id:5,a:'p',from:'Jamie',subj:'Dinner Saturday?',pre:'We found a new place downtown. Are you free around 7?…',tm:'Mon',cat:'pers',act:true,urg:false,
+     sum:'Jamie is asking whether you’re free Saturday around 7 PM for dinner downtown.',due:'',
+     draft:'Yes, Saturday at 7 works! Send me the address and I’ll meet you there.'},
+    {id:6,a:'p',from:'Google',subj:'New sign-in on iPhone',pre:'If this was you, you don’t need to do anything…',tm:'Mon',cat:'sec',act:true,urg:false,
+     sum:'A new sign-in was detected on an iPhone. If it was you, no action is needed. If not, secure the account.',due:'',draft:''},
+    {id:7,a:'h',from:'Shipment Updates',subj:'Your package arrives tomorrow',pre:'Out for delivery. Track your package…',tm:'Mon',cat:'order',act:false,urg:false,
+     sum:'Your order arrives tomorrow by 8 PM. No action needed.',due:'',draft:''},
+    {id:8,a:'y',from:'Library Notices',subj:'Your hold is ready for pickup',pre:'Your hold will be kept until Oct 27…',tm:'Sun',cat:'order',act:false,urg:false,
+     sum:'Your library hold is ready and kept until Oct 27.',due:'Oct 27',draft:''}
+  ];
+
+  var CLEAN=[
+    {k:'Express',n:14},{k:'Vivid Seats',n:11},{k:'Soma',n:9},{k:'Nordstrom Rack',n:8},
+    {k:'Ulta',n:6},{k:'Costco',n:5},{k:'The Onion',n:4},{k:'Etsy',n:3}
+  ];
+  var sel={};
+
+  var needs=[
+    {t:'Renew or review auto insurance',w:'Harbor Auto Insurance',d:'Due Nov 3',done:false,id:1},
+    {t:'Confirm Thursday’s appointment',w:'Bayview Family Practice',d:'Reply today',done:false,id:2},
+    {t:'Review the Q4 coverage plan',w:'Dana Whitfield',d:'By Friday',done:false,id:3}
+  ];
+  var tasks=[
+    {t:'Review Q4 coverage plan',e:true,done:false},
+    {t:'Pay the rest of the statement balance',e:true,done:false},
+    {t:'Reply to Jamie about dinner',e:true,done:false},
+    {t:'Order a new air filter',e:false,done:false},
+    {t:'Book a dentist cleaning',e:false,done:true}
+  ];
+  var AGENDA=[
+    {h:9,t:'9:00',x:'Division check-in'},
+    {h:11,t:'11:30',x:'Review candidate shortlist'},
+    {h:13,t:'1:00',x:'Lunch, protected time'},
+    {h:15,t:'3:30',x:'Focus block: Q4 plan'},
+    {h:18,t:'6:00',x:'Evening class'}
+  ];
+  var UPC=[
+    {x:'Auto insurance renews',d:'Nov 3'},
+    {x:'Card statement due',d:'Nov 6'},
+    {x:'Dishwasher warranty ends',d:'Dec 12'}
+  ];
+  var MODS=[
+    ['Calendar and tasks','In progress'],['Home management','Planned'],['Finances','Planned'],
+    ['Travel','Planned'],['Health and wellness','Planned'],['Personal projects','Planned']
+  ];
+
+  var st={tab:'today',acct:'all',box:'priority',q:''};
+
+  function dot(a){return '<span class="dot" style="background:'+ACCTS[a].c+'"></span>'}
+  function tag(c){return '<span class="tag">'+CAT_NAMES[c]+'</span>'}
+  function toast(t){var e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(function(){e.classList.remove('show')},3200)}
+
+  /* Greeting */
+  var now=new Date(),hr=now.getHours();
+  $('#greet').textContent=(hr<12?'Good morning':hr<18?'Good afternoon':'Good evening')+', Juniper';
+  $('#datel').textContent=now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+
+  /* Today */
+  function renderNeeds(){
+    $('#needs').innerHTML=needs.map(function(n,i){
+      return '<div class="need'+(n.done?' done':'')+'"><button class="chk" data-n="'+i+'" aria-label="'+(n.done?'Mark not done':'Mark done')+'">'+(n.done?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>':'')+'</button>'+
+      '<div><div class="when">'+esc(n.d)+'</div><div class="nt">'+esc(n.t)+'</div><div class="nw">'+esc(n.w)+'</div></div></div>';
+    }).join('');
+  }
+  function renderAgenda(){
+    var cur=-1;AGENDA.forEach(function(a,i){if(a.h<=hr)cur=i});
+    $('#agenda').innerHTML=AGENDA.map(function(a,i){
+      var c=i<cur?' past':i===cur?' now':'';
+      return '<li class="'+c.trim()+'"><span class="t">'+a.t+'</span><b>'+esc(a.x)+'</b></li>';
+    }).join('');
+  }
+  function renderBars(){
+    var max=0,k;for(k in ACCTS)max=Math.max(max,ACCTS[k].u);
+    $('#bars').innerHTML=Object.keys(ACCTS).map(function(k){
+      var a=ACCTS[k];
+      return '<div class="bar"><span>'+dot(k)+' '+a.n+'</span><span class="track"><span class="fill" style="display:block;width:'+Math.round(a.u/max*100)+'%;background:'+a.c+'"></span></span><span class="n">'+a.u+'</span></div>';
+    }).join('');
+  }
+  $('#upcoming').innerHTML=UPC.map(function(u){return '<div class="up"><span>'+esc(u.x)+'</span><span class="d">'+u.d+'</span></div>'}).join('');
+  $('#needs').addEventListener('click',function(e){
+    var b=e.target.closest('.chk');if(!b)return;
+    var n=needs[+b.dataset.n];n.done=!n.done;renderNeeds();
+  });
+
+  /* Inbox */
+  function renderChips(){
+    var h='<button class="chip" data-a="all" aria-pressed="'+(st.acct==='all')+'">All accounts</button>';
+    Object.keys(ACCTS).forEach(function(k){
+      h+='<button class="chip" data-a="'+k+'" aria-pressed="'+(st.acct===k)+'">'+dot(k)+ACCTS[k].n+'</button>';
+    });
+    $('#chips').innerHTML=h;
+  }
+  function renderList(){
+    var box=$('#ib-list');
+    if(st.box==='clean'){renderClean();return}
+    var q=st.q.trim().toLowerCase();
+    var list=MSGS.filter(function(m){
+      if(st.acct!=='all'&&m.a!==st.acct)return false;
+      if(st.box==='priority'&&!m.act)return false;
+      if(q&&(m.from+' '+m.subj+' '+m.pre).toLowerCase().indexOf(q)<0)return false;
+      return true;
+    });
+    if(!list.length){box.innerHTML='<div class="empty">Nothing here. That’s a good thing.</div>';return}
+    box.innerHTML=list.map(function(m){
+      return '<button class="msg'+(m.urg?' urg':'')+'" data-m="'+m.id+'"><div class="l1">'+dot(m.a)+'<b>'+esc(m.from)+'</b><span class="tm">'+m.tm+'</span></div>'+
+        '<div class="s">'+esc(m.subj)+'</div><div class="p">'+esc(m.pre)+'</div><div style="margin-top:6px">'+tag(m.cat)+(m.urg?'<span class="tag urg">Needs you</span>':'')+'</div></button>';
+    }).join('');
+  }
+  function selCount(){return Object.keys(sel).filter(function(k){return sel[k]&&sel[k]!=='keep'}).length}
+  function renderClean(){
+    var h='<p class="fine" style="margin:12px 0 0">Newsletters and promotions you rarely open. Pick an action for each sender, then review before anything happens.</p>';
+    h+=CLEAN.map(function(c,i){
+      var s=sel[c.k]||'';
+      return '<div class="cl"><div><b>'+esc(c.k)+'</b><div class="muted" style="font-size:14px">'+c.n+' emails, none opened</div></div><span></span>'+
+      '<div class="opts"><button class="opt" data-c="'+i+'" data-v="unsub" aria-pressed="'+(s==='unsub')+'">Unsubscribe</button>'+
+      '<button class="opt sp" data-c="'+i+'" data-v="spam" aria-pressed="'+(s==='spam')+'">Mark spam</button>'+
+      '<button class="opt" data-c="'+i+'" data-v="keep" aria-pressed="'+(s==='keep')+'">Keep</button></div></div>';
+    }).join('');
+    var n=selCount();
+    if(n)h+='<div class="review"><span>'+n+' sender'+(n>1?'s':'')+' selected</span><button class="btn" id="rv">Review</button></div>';
+    $('#ib-list').innerHTML=h;
+  }
+  $('#chips').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;st.acct=b.dataset.a;renderChips();renderList()});
+  $('#q').addEventListener('input',function(e){st.q=e.target.value;if(st.box==='clean')st.box='all';syncSeg();renderList()});
+  $$('.seg [data-box]').forEach(function(b){b.addEventListener('click',function(){st.box=b.dataset.box;syncSeg();renderList()})});
+  function syncSeg(){$$('.seg [data-box]').forEach(function(b){b.setAttribute('aria-selected',b.dataset.box===st.box)})}
+  $('#ib-list').addEventListener('click',function(e){
+    var m=e.target.closest('.msg');if(m){openMsg(+m.dataset.m);return}
+    var o=e.target.closest('.opt');if(o){var k=CLEAN[+o.dataset.c].k,v=o.dataset.v;sel[k]=sel[k]===v?'':v;renderClean();return}
+    if(e.target.id==='rv')openReview();
+  });
+
+  /* Sheet */
+  function openSheet(html){
+    $('#sh').innerHTML='<button class="x" id="sx" aria-label="Close">×</button>'+html;
+    $('#scrim').classList.add('open');$('#sheet').classList.add('open');
+    $('#sx').focus();$('#sx').addEventListener('click',closeSheet);
+  }
+  function closeSheet(){$('#scrim').classList.remove('open');$('#sheet').classList.remove('open')}
+  $('#scrim').addEventListener('click',closeSheet);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
+
+  function openMsg(id){
+    var m=MSGS.filter(function(x){return x.id===id})[0];
+    var h='<p style="margin:0 0 6px">'+dot(m.a)+' <b>'+esc(m.from)+'</b> <span class="muted">to '+ACCTS[m.a].n+'</span></p>'+
+      '<h3>'+esc(m.subj)+'</h3><div style="margin-top:8px">'+tag(m.cat)+(m.urg?'<span class="tag urg">Needs you</span>':'')+'</div>'+
+      '<h4>Summary</h4><p>'+esc(m.sum)+'</p>';
+    if(m.due)h+='<h4>Deadline found</h4><p class="due">'+esc(m.due)+'</p>';
+    if(m.draft){
+      h+='<h4>Suggested reply</h4><textarea id="dr" aria-label="Suggested reply">'+esc(m.draft)+'</textarea>'+
+      '<div class="btnrow"><button class="btn" id="cp">Copy reply</button><button class="btn ghost" disabled>Send</button></div>'+
+      '<p class="fine">You review and edit every draft. Nothing is sent without your approval, and sending is switched off in this demo.</p>';
+    }else h+='<h4>Reply</h4><p class="muted">No reply needed.</p>';
+    openSheet(h);
+    var cp=$('#cp');if(cp)cp.addEventListener('click',function(){
+      var v=$('#dr').value;
+      try{navigator.clipboard.writeText(v).then(function(){toast('Reply copied')},function(){toast('Select the text to copy it')})}catch(x){toast('Select the text to copy it')}
+    });
+  }
+  function openReview(){
+    var items=CLEAN.filter(function(c){return sel[c.k]&&sel[c.k]!=='keep'});
+    var lab={unsub:'Unsubscribe',spam:'Mark as spam'};
+    openSheet('<h3>Review your choices</h3><p class="muted">Nothing happens until you confirm.</p>'+
+      items.map(function(c){return '<div class="li"><b>'+esc(c.k)+'</b>: '+lab[sel[c.k]]+' ('+c.n+' emails)</div>'}).join('')+
+      '<div class="btnrow"><button class="btn" id="ok">Confirm</button><button class="btn ghost" id="no">Go back</button></div>'+
+      '<p class="fine">Demo only. In the full app, this is the one step where changes are made, and trashed mail stays recoverable for 30 days.</p>');
+    $('#no').addEventListener('click',closeSheet);
+    $('#ok').addEventListener('click',function(){closeSheet();toast('Demo only: no real emails were changed')});
+  }
+
+  /* Tasks */
+  function renderTasks(){
+    $('#tlist').innerHTML=tasks.map(function(t,i){
+      return '<div class="task'+(t.done?' done':'')+'"><button class="chk" data-t="'+i+'" aria-label="Toggle task">'+(t.done?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>':'')+'</button><div style="flex:1"><div class="tt">'+esc(t.t)+'</div>'+(t.e?'<span class="tag" style="margin-top:4px">From email</span>':'')+'</div></div>';
+    }).join('');
+  }
+  $('#tlist').addEventListener('click',function(e){var b=e.target.closest('.chk');if(!b)return;var t=tasks[+b.dataset.t];t.done=!t.done;renderTasks()});
+  function addTask(){var i=$('#newt'),v=i.value.trim();if(!v)return;tasks.unshift({t:v,e:false,done:false});i.value='';renderTasks()}
+  $('#addb').addEventListener('click',addTask);
+  $('#newt').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addTask()}});
+
+  /* More */
+  $('#accts').innerHTML=Object.keys(ACCTS).map(function(k,i){
+    return '<div class="mod"><p>'+dot(k)+' '+ACCTS[k].n+'</p><span class="'+(i===0?'on':'soon')+'">'+(i===0?'Connected, read-only':'Connect later')+'</span></div>';
+  }).join('');
+  $('#mods').innerHTML=MODS.map(function(m){return '<div class="mod"><p>'+m[0]+'</p><span class="soon">'+m[1]+'</span></div>'}).join('');
+  function setTheme(m){
+    var r=document.documentElement;
+    if(m==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',m);
+    $$('#themeseg [data-th]').forEach(function(b){b.setAttribute('aria-selected',b.dataset.th===m)});
+    try{localStorage.setItem('lh-theme',m)}catch(e){}
+  }
+  $$('#themeseg [data-th]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.dataset.th)})});
+  try{var sv=localStorage.getItem('lh-theme');if(sv)setTheme(sv)}catch(e){}
+
+  /* Navigation */
+  function show(t){
+    st.tab=t;
+    $$('.view').forEach(function(v){v.hidden=v.id!=='v-'+t});
+    $$('.tab').forEach(function(b){if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+    window.scrollTo(0,0);
+  }
+  $$('.tab').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.tab)})});
+  $('#go-clean').addEventListener('click',function(){st.box='clean';st.acct='all';syncSeg();renderChips();renderList();show('inbox')});
+
+  renderNeeds();renderAgenda();renderBars();renderChips();renderList();renderTasks();
+})();
+</script>
+</body>
+</html>
