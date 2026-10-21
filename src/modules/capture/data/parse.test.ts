@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanTitle, findDate, parseBrainDump, splitThoughts } from "./parse";
+import { cleanTitle, findDate, findRepeat, findWaiting, parseBrainDump, splitThoughts } from "./parse";
 
 // Tuesday, Oct 20 2026
 const now = new Date("2026-10-20T09:00:00");
@@ -79,5 +79,90 @@ describe("the approved example", () => {
       ["task", "Check on the insurance renewal", "t-car"],
     ]);
     expect(out.every((s) => s.due === undefined)).toBe(true);
+  });
+});
+
+describe("repeats", () => {
+  it("reads common repeat wording", () => {
+    const cases: [string, number][] = [
+      ["water the plants every Sunday", 7],
+      ["take out recycling weekly", 7],
+      ["call grandma every other week", 14],
+      ["pay rent monthly", 30],
+      ["replace the furnace filter every 3 months", 90],
+      ["renew the parking permit every year", 365],
+      ["clean the gutters twice a year", 180],
+      ["feed the cat every day", 1],
+      ["water the herbs on Sundays", 7],
+    ];
+    for (const [text, days] of cases) expect(findRepeat(text)?.days, text).toBe(days);
+  });
+  it("ignores text without a repeat", () => {
+    expect(findRepeat("call the plumber about the sink")).toBeUndefined();
+    expect(findRepeat("every so often I forget my keys")).toBeUndefined();
+  });
+  it("sets the first date from a weekday and drops the repeat words from the title", () => {
+    const [s] = parseBrainDump("Remind me every Sunday to water the plants", now);
+    expect(s).toMatchObject({ kind: "reminder", title: "Water the plants", repeat: { days: 7 }, due: { dayOffset: 5 } });
+  });
+  it("keeps repeats without a day undated", () => {
+    const [s] = parseBrainDump("I need to pay the water bill every month", now);
+    expect(s).toMatchObject({ kind: "task", title: "Pay the water bill", repeat: { days: 30 } });
+    expect(s.due).toBeUndefined();
+  });
+});
+
+describe("waiting on others", () => {
+  it("reads 'waiting on/for … to …'", () => {
+    expect(findWaiting("I'm still waiting on the plumber to send a quote")).toMatchObject({ who: "the plumber", title: "The plumber to send a quote" });
+    expect(findWaiting("waiting for the refund")).toMatchObject({ who: "the refund", title: "The refund" });
+    expect(findWaiting("waiting on Dana")).toMatchObject({ who: "Dana", title: "Hear back from Dana" });
+  });
+  it("reads 'hasn't replied' and 'waiting to hear back'", () => {
+    expect(findWaiting("Dana still hasn't replied about the venue")).toMatchObject({ who: "Dana", title: "Hear back from Dana about the venue" });
+    expect(findWaiting("waiting to hear back from Stride Physio about the intake")).toMatchObject({ who: "Stride Physio", title: "Hear back from Stride Physio about the intake" });
+    expect(findWaiting("they haven't called back")).toMatchObject({ who: "someone", title: "Hear back from them" });
+  });
+  it("leaves ordinary tasks alone", () => {
+    expect(findWaiting("call the plumber about the sink")).toBeUndefined();
+    expect(findWaiting("reply to Dana about the venue")).toBeUndefined();
+  });
+  it("turns waiting thoughts into waiting tasks in a brain dump, keeping a stated follow-up date", () => {
+    const out = parseBrainDump("Order cat food. Still waiting on the insurance company to send the new card by Friday", now, threads);
+    expect(out[0]).toMatchObject({ kind: "task", title: "Order cat food" });
+    expect(out[0].waiting).toBeUndefined();
+    expect(out[1]).toMatchObject({
+      kind: "task",
+      title: "The insurance company to send the new card",
+      waiting: { who: "the insurance company" },
+      due: { dayOffset: 3 },
+      threadId: "t-car",
+    });
+  });
+});
+
+describe("review fixes: no false waits or repeats", () => {
+  it("doesn't treat a passing mention of waiting as the task", () => {
+    expect(findWaiting("Call the dentist while waiting for the results")).toBeUndefined();
+    expect(findWaiting("I'm waiting for the bus and need to call mom")).toBeUndefined();
+    expect(findWaiting("I haven't replied to Dana")).toBeUndefined();
+  });
+  it("drops a wait that only names a day", () => {
+    const [s] = parseBrainDump("Still waiting for Friday", now);
+    expect(s.waiting).toBeUndefined();
+  });
+  it("reads daily/monthly only as a repeat, not an adjective", () => {
+    expect(findRepeat("buy a monthly pass")).toBeUndefined();
+    expect(findRepeat("cancel the daily newspaper")).toBeUndefined();
+    expect(findRepeat("pay rent monthly.")?.days).toBe(30);
+    expect(findRepeat("check the meter every 30 days")?.days).toBe(30);
+  });
+  it("leaves no stray punctuation where a repeat was", () => {
+    expect(parseBrainDump("Every other day, take vitamins", now)[0].title).toBe("Take vitamins");
+  });
+  it("stays fast on long repetitive input", () => {
+    const t = performance.now();
+    findWaiting("i'm ".repeat(5000) + "waiting");
+    expect(performance.now() - t).toBeLessThan(50);
   });
 });

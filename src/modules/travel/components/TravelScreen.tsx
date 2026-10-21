@@ -3,25 +3,80 @@
 import { useState } from "react";
 import { addDays, formatDay, untilLabel, useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
-import { Button, Card, CheckCircle, Chip, PageHeader, Section, Tag, cx } from "@/core/ui/primitives";
+import { clearIntent, intentStore } from "@/core/store/intent";
+import { Sheet } from "@/core/ui/Sheet";
+import { Button, Card, CheckCircle, Chip, EmptyState, PageHeader, Section, Tag, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { sortTasks, taskStore, toggleTask } from "@/modules/tasks";
 import { ThreadTag } from "@/modules/threads";
 import { groupPacking, itinerary, packingProgress, tripReminders } from "../data/logic";
 import { addPackItem, togglePacked, tripStore } from "../data/store";
-import type { PackItem, Reservation } from "../data/types";
+import { RESERVATION_LABEL, type PackItem } from "../data/types";
+import { ReservationForm, TripForm } from "./TripForms";
 
-const KIND_LABEL: Record<Reservation["kind"], string> = { flight: "Flight", stay: "Stay", dining: "Dining", activity: "Activity", transport: "Train" };
+type Editing = { kind: "trip-new" } | { kind: "trip-edit" } | { kind: "res-new" } | { kind: "res-edit"; id: string };
 
 export function TravelScreen() {
   const now = useNow();
   const trips = useStore(tripStore);
   const tasks = useStore(taskStore);
-  const [tripId, setTripId] = useState(trips[0]?.id);
+  const intent = useStore(intentStore);
+  const [pickedId, setTripId] = useState(trips[0]?.id);
   const [newItem, setNewItem] = useState("");
   const [group, setGroup] = useState<PackItem["group"]>("Other");
+  const [localEditing, setEditing] = useState<Editing | null>(null);
+  // Search can ask for a specific trip or the "new trip" form without importing this screen.
+  const tripId = intent.trip ?? pickedId;
+  const editing: Editing | null = intent.create === "trip" ? { kind: "trip-new" } : localEditing;
   const trip = trips.find((t) => t.id === tripId) ?? trips[0];
-  if (!trip) return null;
+
+  function edit(next: Editing | null) {
+    if (intent.create === "trip") clearIntent("create");
+    setEditing(next);
+  }
+  function pick(id: string) {
+    if (intent.trip) clearIntent("trip");
+    setTripId(id);
+  }
+
+  const editingRes = editing?.kind === "res-edit" ? trip?.reservations.find((r) => r.id === editing.id) : undefined;
+  const sheetTitle = editing?.kind === "trip-new" ? "New trip" : editing?.kind === "trip-edit" ? "Edit trip" : editing?.kind === "res-new" ? "Add a booking" : "Edit booking";
+  const sheet = (
+    <Sheet open={!!editing && (editing.kind === "trip-new" || !!trip)} onClose={() => edit(null)} title={sheetTitle}>
+      {editing?.kind === "trip-new" && (
+        <TripForm
+          key="new"
+          onDone={(id) => {
+            if (id) pick(id);
+            edit(null);
+          }}
+        />
+      )}
+      {editing?.kind === "trip-edit" && trip && <TripForm key={`edit-${trip.id}`} trip={trip} onDone={() => edit(null)} />}
+      {editing?.kind === "res-new" && trip && <ReservationForm key={`res-new-${trip.id}`} trip={trip} onDone={() => edit(null)} />}
+      {editing?.kind === "res-edit" && trip && editingRes && <ReservationForm key={editingRes.id} trip={trip} reservation={editingRes} onDone={() => edit(null)} />}
+    </Sheet>
+  );
+
+  const newTrip = (
+    <Button onClick={() => edit({ kind: "trip-new" })}>
+      <Icon.Plus width={18} height={18} /> New trip
+    </Button>
+  );
+
+  if (!trip)
+    return (
+      <div>
+        <PageHeader title="Travel" subtitle="Trips, bookings and packing in one place." />
+        <div className="mt-5">
+          <EmptyState title="No trips planned" icon={<Icon.Plane />}>
+            Add a trip to keep its bookings and packing list together.
+          </EmptyState>
+          <div className="mt-4">{newTrip}</div>
+        </div>
+        {sheet}
+      </div>
+    );
 
   const progress = packingProgress(trip.packing);
   const related = trip.threadId ? sortTasks(tasks).filter((t) => t.threadId === trip.threadId) : [];
@@ -31,21 +86,37 @@ export function TravelScreen() {
   return (
     <div>
       <PageHeader title="Travel" subtitle="Trips, bookings and packing in one place." />
-      <div role="group" aria-label="Choose a trip" className="mt-4 flex flex-wrap gap-2">
-        {trips.map((t) => (
-          <Chip key={t.id} pressed={t.id === trip.id} onClick={() => setTripId(t.id)}>
-            <Icon.Plane width={16} height={16} /> {t.name}
-          </Chip>
-        ))}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div role="group" aria-label="Choose a trip" className="flex flex-wrap gap-2">
+          {trips.map((t) => (
+            <Chip key={t.id} pressed={t.id === trip.id} onClick={() => pick(t.id)}>
+              <Icon.Plane width={16} height={16} /> {t.name}
+            </Chip>
+          ))}
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => edit({ kind: "trip-new" })}>
+          <Icon.Plus width={16} height={16} /> New trip
+        </Button>
       </div>
 
       <div className="mt-5 rounded-3xl bg-accent p-5 text-accent-ink animate-rise">
         <p className="text-sm font-semibold opacity-90">{trip.destination}</p>
         <h2 className="mt-1 text-[26px] leading-tight">{trip.name}</h2>
         <p className="mt-1">
-          {formatDay(start)} – {formatDay(end)} · {trip.nights} nights
+          {formatDay(start)} – {formatDay(end)} · {trip.nights === 0 ? "day trip" : `${trip.nights} night${trip.nights === 1 ? "" : "s"}`}
         </p>
-        <p className="mt-3 inline-flex rounded-full bg-ink/15 px-3 py-1 text-sm font-semibold">Leaves {untilLabel(trip.startOffset)}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <p className="inline-flex rounded-full bg-ink/15 px-3 py-1 text-sm font-semibold">
+            {trip.startOffset >= 0 ? `Leaves ${untilLabel(trip.startOffset)}` : trip.startOffset + trip.nights >= 0 ? "Happening now" : `Ended ${untilLabel(trip.startOffset + trip.nights)}`}
+          </p>
+          <button
+            type="button"
+            onClick={() => edit({ kind: "trip-edit" })}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink/15 px-3 text-sm font-semibold hover:bg-ink/25"
+          >
+            <Icon.Pencil width={15} height={15} /> Edit trip
+          </button>
+        </div>
         {trip.threadId && (
           <div className="mt-3">
             <ThreadTag id={trip.threadId} />
@@ -64,8 +135,17 @@ export function TravelScreen() {
       )}
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-8">
-        <Section title="Itinerary" id="itinerary">
+        <Section
+          title="Itinerary"
+          id="itinerary"
+          action={
+            <Button size="sm" variant="ghost" onClick={() => edit({ kind: "res-new" })}>
+              <Icon.Plus width={16} height={16} /> Add booking
+            </Button>
+          }
+        >
           <Card className="py-2">
+            {trip.reservations.length === 0 && <p className="py-3 text-sm text-muted">No bookings yet. Add flights, stays and plans to build the day-by-day view.</p>}
             <ol>
               {itinerary(trip).map((d) => (
                 <li key={d.dayIndex} className="border-b border-line py-3 last:border-b-0">
@@ -75,14 +155,25 @@ export function TravelScreen() {
                   <ul className="mt-1.5 space-y-2">
                     {d.items.map((r) => (
                       <li key={r.id}>
-                        <p className="flex flex-wrap items-center gap-2">
-                          <Tag tone="neutral">{KIND_LABEL[r.kind]}</Tag>
-                          <b className="font-semibold">{r.title}</b>
-                        </p>
-                        <p className="text-sm text-muted">
-                          {r.time && `${r.time} · `}
-                          {r.detail} · Conf. <span className="font-mono">{r.confirmation}</span>
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() => edit({ kind: "res-edit", id: r.id })}
+                          aria-label={`Edit booking: ${r.title}`}
+                          className="-mx-2 block w-[calc(100%+1rem)] rounded-xl px-2 py-1 text-left hover:bg-surface-2"
+                        >
+                          <span className="flex flex-wrap items-center gap-2">
+                            <Tag tone="neutral">{RESERVATION_LABEL[r.kind]}</Tag>
+                            <b className="font-semibold">{r.title}</b>
+                          </span>
+                          <span className="block text-sm text-muted">
+                            {[r.time, r.detail].filter(Boolean).join(" · ")}
+                            {r.confirmation && (
+                              <>
+                                {(r.time || r.detail) && " · "}Conf. <span className="font-mono">{r.confirmation}</span>
+                              </>
+                            )}
+                          </span>
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -160,6 +251,7 @@ export function TravelScreen() {
           )}
         </div>
       </div>
+      {sheet}
     </div>
   );
 }

@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { addDays, formatDay, startOfDay, useNow } from "@/core/date";
+import { addDays, formatDay, startOfDay, toISODate as toISO, useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
 import { Button, Card, CheckCircle, EmptyState, PageHeader, Segmented, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
-import { addTask, type TaskCategory } from "@/modules/tasks";
+import { REPEAT_OPTIONS, addTask, repeatLabel, type TaskCategory } from "@/modules/tasks";
 import { addThreadNote, createThread, threadStore, type LifeThread } from "@/modules/threads";
 import { parseBrainDump, type Suggestion, type SuggestionKind } from "../data/parse";
 import { draftStore } from "../data/store";
@@ -18,6 +18,9 @@ type Editable = Suggestion & {
   dueSource?: string;
   thread: string; // thread id, "" for none, "__new" for a new thread
   newThreadName: string;
+  repeatDays?: number;
+  /** Set when the next step is someone else's; the task is added as "Waiting on". */
+  waitingOn?: string;
 };
 
 const NEW = "__new";
@@ -32,10 +35,6 @@ const THREAD_CATEGORY: Record<string, TaskCategory> = {
   "t-lisbon": "Travel",
 };
 
-function toISO(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 export function CaptureScreen() {
   const now = useNow();
   const draft = useStore(draftStore);
@@ -43,7 +42,7 @@ export function CaptureScreen() {
   const [step, setStep] = useState<"compose" | "review" | "done">("compose");
   const [items, setItems] = useState<Editable[]>([]);
   const [voiceOpen, setVoiceOpen] = useState(false);
-  const [result, setResult] = useState<{ tasks: number; reminders: number; notes: number; threads: number } | null>(null);
+  const [result, setResult] = useState<{ tasks: number; reminders: number; notes: number; threads: number; waiting: number; repeating: number } | null>(null);
 
   function review() {
     const parsed = parseBrainDump(draft, now, threads);
@@ -55,6 +54,8 @@ export function CaptureScreen() {
         dueSource: s.due?.phrase,
         thread: s.threadId ?? "",
         newThreadName: "",
+        repeatDays: s.repeat?.days,
+        waitingOn: s.waiting?.who,
       })),
     );
     setStep("review");
@@ -68,7 +69,7 @@ export function CaptureScreen() {
 
   function commit() {
     const created = new Map<string, string>();
-    const counts = { tasks: 0, reminders: 0, notes: 0, threads: 0 };
+    const counts = { tasks: 0, reminders: 0, notes: 0, threads: 0, waiting: 0, repeating: 0 };
     for (const i of included) {
       let threadId = i.thread || undefined;
       if (i.thread === NEW) {
@@ -83,8 +84,20 @@ export function CaptureScreen() {
         addThreadNote(threadId!, i.title);
         counts.notes += 1;
       } else {
-        addTask({ title: i.title, kind: i.kind, category: (threadId && THREAD_CATEGORY[threadId]) || "Errands", dueDate: i.dueDate, dueSource: i.dueDate ? i.dueSource : undefined, threadId });
+        const waiting = i.kind === "task" && i.waitingOn !== undefined;
+        addTask({
+          title: i.title,
+          kind: i.kind,
+          category: (threadId && THREAD_CATEGORY[threadId]) || "Errands",
+          dueDate: i.dueDate,
+          dueSource: i.dueDate ? i.dueSource : undefined,
+          threadId,
+          repeatEveryDays: i.repeatDays,
+          ...(waiting && { status: "waiting" as const, waitingOn: i.waitingOn!.trim() || "Someone else" }),
+        });
         counts[i.kind === "reminder" ? "reminders" : "tasks"] += 1;
+        if (waiting) counts.waiting += 1;
+        if (i.repeatDays) counts.repeating += 1;
       }
     }
     draftStore.set("");
@@ -99,6 +112,7 @@ export function CaptureScreen() {
       result.notes && `${result.notes} thread note${result.notes > 1 ? "s" : ""}`,
       result.threads && `${result.threads} new Life Thread${result.threads > 1 ? "s" : ""}`,
     ].filter(Boolean);
+    const extras = [result.waiting && `${result.waiting} waiting on someone else`, result.repeating && `${result.repeating} repeating`].filter(Boolean);
     return (
       <div className="max-w-2xl">
         <PageHeader title="Added" />
@@ -106,6 +120,7 @@ export function CaptureScreen() {
           <p className="flex items-center gap-2 font-semibold text-accent">
             <Icon.Check width={20} height={20} /> {parts.length ? parts.join(", ") : "Nothing"} added
           </p>
+          {extras.length > 0 && <p className="mt-1 text-sm">Including {extras.join(" and ")}.</p>}
           <p className="mt-1 text-sm text-muted">Only what you approved was added. Everything else was left out.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/tasks" className="inline-flex min-h-11 items-center rounded-xl bg-accent px-4 font-semibold text-accent-ink">
@@ -199,6 +214,8 @@ export function CaptureScreen() {
                         )}
                       </div>
                     )}
+                    {i.kind !== "note" && <RepeatPicker item={i} onChange={(p) => update(i.id, p)} />}
+                    {i.kind === "task" && <WaitingPicker item={i} onChange={(p) => update(i.id, p)} />}
                     {i.kind === "note" && !i.thread && <p className="text-sm font-semibold text-urgent">Pick a Life Thread for this note, or switch it off.</p>}
                   </div>
                 )}
@@ -249,7 +266,8 @@ export function CaptureScreen() {
         )}
       </div>
       <p className="mt-4 text-sm text-muted">
-        Sorting uses simple rules on this device, not AI. Dates are only set when you say one (like “by Friday”); vague timing stays a hint.
+        Sorting uses simple rules on this device, not AI. Dates are only set when you say one (like “by Friday”); vague timing stays a hint. Say
+        “every Sunday” to make something repeat, or “waiting on Dana” to track a step that&apos;s someone else&apos;s.
       </p>
       <VoiceSheet open={voiceOpen} onClose={() => setVoiceOpen(false)} onUse={(t) => draftStore.set((d) => (d.trim() ? `${d.trim()}\n${t}` : t))} />
     </div>
@@ -287,6 +305,59 @@ function ThreadPicker({ item, threads, onChange }: { item: Editable; threads: Li
           className="min-h-10 min-w-0 flex-1 rounded-xl border-[1.5px] border-line bg-bg px-3"
         />
       )}
+    </div>
+  );
+}
+
+function RepeatPicker({ item, onChange }: { item: Editable; onChange: (p: Partial<Editable>) => void }) {
+  const custom = item.repeatDays && !REPEAT_OPTIONS.some((o) => o.days === item.repeatDays);
+  const fromWords = item.repeat && item.repeatDays === item.repeat.days;
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm">
+      <label htmlFor={`repeat-${item.id}`} className="font-semibold">
+        Repeats
+      </label>
+      <select
+        id={`repeat-${item.id}`}
+        value={item.repeatDays ?? ""}
+        onChange={(e) => onChange({ repeatDays: e.target.value ? Number(e.target.value) : undefined })}
+        className="min-h-10 max-w-full rounded-xl border-[1.5px] border-line bg-bg px-2"
+      >
+        <option value="">Never</option>
+        {custom && <option value={item.repeatDays}>{repeatLabel(item.repeatDays!)}</option>}
+        {REPEAT_OPTIONS.map((o) => (
+          <option key={o.days} value={o.days}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {fromWords && <span className="text-xs text-muted">from “{item.repeat!.phrase}”</span>}
+    </div>
+  );
+}
+
+function WaitingPicker({ item, onChange }: { item: Editable; onChange: (p: Partial<Editable>) => void }) {
+  if (item.waitingOn === undefined)
+    return (
+      <Button size="sm" variant="quiet" onClick={() => onChange({ waitingOn: "" })}>
+        Waiting on someone?
+      </Button>
+    );
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-xl bg-lavender-soft p-2 text-sm">
+      <label htmlFor={`waiting-${item.id}`} className="font-semibold text-lavender">
+        Waiting on
+      </label>
+      <input
+        id={`waiting-${item.id}`}
+        value={item.waitingOn}
+        onChange={(e) => onChange({ waitingOn: e.target.value })}
+        placeholder="who or what"
+        className="min-h-10 min-w-0 flex-1 rounded-xl border-[1.5px] border-line bg-bg px-3"
+      />
+      <Button size="sm" variant="quiet" onClick={() => onChange({ waitingOn: undefined })}>
+        Not waiting
+      </Button>
     </div>
   );
 }

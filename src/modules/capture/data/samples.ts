@@ -16,4 +16,8 @@ export const SAMPLE_TRANSCRIPTS = [
     label: "Errands",
     text: "Pick up the library hold in 4 days. Buy a birthday card for Priya. Maybe sign up for the pottery workshop sometime.",
   },
+  {
+    label: "Loose ends",
+    text: "Remind me every Sunday to water the plants. Still waiting on the plumber to send a quote. Dana hasn't replied about the venue. Pay the water bill every month.",
+  },
 ];

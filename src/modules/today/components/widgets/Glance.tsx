@@ -45,7 +45,7 @@ export function AppointmentsWidget() {
                       <b className="font-semibold">{a.title}</b>
                       <Tag tone={needsAttention(a) ? "urgent" : "lavender"}>{STATUS_LABEL[a.status]}</Tag>
                     </span>
-                    <span className="block text-sm text-muted">{a.when ? `${relativeDay(a.when.dayOffset, now)}, ${a.when.time} · ${a.provider}` : nextActions(a)[0]?.text}</span>
+                    <span className="block text-sm text-muted">{a.when ? `${relativeDay(a.when.dayOffset, now)}${a.when.time ? `, ${a.when.time}` : ""} · ${a.provider}` : nextActions(a)[0]?.text}</span>
                   </span>
                 </Link>
               </li>

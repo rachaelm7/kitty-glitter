@@ -202,7 +202,7 @@ export function ThreadDetailScreen({ id }: { id: string }) {
                       <b className="block font-semibold">{a.title}</b>
                       <span className="text-sm text-muted">
                         {a.provider}
-                        {a.when && ` · ${formatDay(addDays(src.now, a.when.dayOffset))}, ${a.when.time}`}
+                        {a.when && ` · ${formatDay(addDays(src.now, a.when.dayOffset))}${a.when.time ? `, ${a.when.time}` : ""}`}
                       </span>
                     </Link>
                     <Tag tone="lavender">{STATUS_LABEL[a.status]}</Tag>
@@ -224,7 +224,7 @@ export function ThreadDetailScreen({ id }: { id: string }) {
                 <Link key={t.id} href="/travel" className="block hover:underline">
                   <b className="font-semibold">{t.name}</b>
                   <span className="block text-sm text-muted">
-                    {formatDay(addDays(src.now, t.startOffset))} · {t.nights} nights · {t.reservations.length} bookings
+                    {formatDay(addDays(src.now, t.startOffset))} · {t.nights} night{t.nights === 1 ? "" : "s"} · {t.reservations.length} bookings
                   </span>
                 </Link>
               ))}

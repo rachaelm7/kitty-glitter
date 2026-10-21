@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { addDays, formatDay, useNow } from "@/core/date";
 import { useStore } from "@/core/store/createStore";
-import { Chip, EmptyState, PageHeader, cx } from "@/core/ui/primitives";
+import { clearIntent, intentStore } from "@/core/store/intent";
+import { Button, Chip, EmptyState, PageHeader, cx } from "@/core/ui/primitives";
 import { Icon } from "@/core/ui/icons";
 import { countByStatus, needsAttention, nextActions, stepIndex } from "../data/logic";
 import { appointmentStore } from "../data/store";
 import { STATUSES, STATUS_LABEL, type Status } from "../data/types";
-import { AppointmentSheet } from "./AppointmentSheet";
+import { AppointmentSheet, type SheetMode } from "./AppointmentSheet";
 import { NotMedicalAdvice } from "./Disclaimer";
 import { ProgressBar } from "./Progress";
 import { StatusPill } from "./StatusPill";
@@ -17,7 +18,15 @@ export function AppointmentsScreen() {
   const now = useNow();
   const list = useStore(appointmentStore);
   const [filter, setFilter] = useState<Status | "all" | "attention">("all");
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [localMode, setMode] = useState<SheetMode | null>(null);
+  const intent = useStore(intentStore);
+  // Search and Today can ask for a specific appointment, or the "new" form, without importing this screen.
+  const mode: SheetMode | null = intent.create === "appointment" ? { kind: "new" } : intent.appointment ? { kind: "view", id: intent.appointment } : localMode;
+  function changeMode(next: SheetMode | null) {
+    if (intent.create === "appointment") clearIntent("create");
+    if (intent.appointment) clearIntent("appointment");
+    setMode(next);
+  }
   const counts = countByStatus(list);
   const attention = list.filter(needsAttention);
 
@@ -27,7 +36,13 @@ export function AppointmentsScreen() {
 
   return (
     <div>
-      <PageHeader title="Appointments" subtitle="Referrals, bookings and follow-ups in one calm list." />
+      <PageHeader title="Appointments" subtitle="Referrals, bookings and follow-ups in one calm list.">
+        <div className="mt-4">
+          <Button onClick={() => changeMode({ kind: "new" })}>
+            <Icon.Plus width={18} height={18} /> New appointment
+          </Button>
+        </div>
+      </PageHeader>
       <div className="mt-5">
         <NotMedicalAdvice />
       </div>
@@ -48,9 +63,15 @@ export function AppointmentsScreen() {
 
       {shown.length === 0 ? (
         <div className="mt-4">
-          <EmptyState title="Nothing here" icon={<Icon.Stethoscope />}>
-            No appointments with this status.
-          </EmptyState>
+          {list.length === 0 ? (
+            <EmptyState title="No appointments yet" icon={<Icon.Stethoscope />}>
+              Add a referral, visit or test to keep track of where it stands.
+            </EmptyState>
+          ) : (
+            <EmptyState title="Nothing here" icon={<Icon.Stethoscope />}>
+              No appointments with this status.
+            </EmptyState>
+          )}
         </div>
       ) : (
         <ul className="mt-4 grid gap-3 lg:grid-cols-2">
@@ -61,7 +82,7 @@ export function AppointmentsScreen() {
               <li key={a.id}>
                 <button
                   type="button"
-                  onClick={() => setOpenId(a.id)}
+                  onClick={() => changeMode({ kind: "view", id: a.id })}
                   className={cx(
                     "flex h-full w-full flex-col gap-2.5 rounded-[22px] border border-line/70 bg-surface shadow-soft p-4 text-left transition-colors hover:bg-surface-2/60",
                     flag && "border-l-4 border-l-urgent",
@@ -77,7 +98,8 @@ export function AppointmentsScreen() {
                   <ProgressBar status={a.status} />
                   {a.when && a.status === "scheduled" && (
                     <span className="flex items-center gap-1.5 text-sm font-semibold">
-                      <Icon.Calendar width={16} height={16} /> {formatDay(addDays(now, a.when.dayOffset))}, {a.when.time}
+                      <Icon.Calendar width={16} height={16} /> {formatDay(addDays(now, a.when.dayOffset))}
+                      {a.when.time && `, ${a.when.time}`}
                     </span>
                   )}
                   {first && (
@@ -92,7 +114,7 @@ export function AppointmentsScreen() {
         </ul>
       )}
 
-      <AppointmentSheet appt={list.find((a) => a.id === openId) ?? null} onClose={() => setOpenId(null)} />
+      <AppointmentSheet mode={mode} list={list} onChange={changeMode} />
     </div>
   );
 }

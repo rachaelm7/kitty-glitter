@@ -3,7 +3,7 @@ export type MaintenanceItem = {
   title: string;
   area: "Heating & air" | "Kitchen" | "Safety" | "Outside" | "Plumbing";
   everyDays: number;
-  lastDoneOffset: number; // sample data: negative days ago, relative to the day it was seeded
+  lastDoneOffset: number; // sample data: negative days ago, relative to today
   /** Set when you mark it done here with no linked task; wins over the sample offset. */
   lastDoneDate?: string; // YYYY-MM-DD
   how?: string;

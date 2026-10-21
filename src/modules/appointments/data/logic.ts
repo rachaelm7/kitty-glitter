@@ -11,7 +11,7 @@ export function nextActions(a: Appointment): NextAction[] {
   switch (a.status) {
     case "needs-scheduling":
       return [
-        { text: `Call ${a.provider} (${a.contact}) to book. The referral was sent ${days(waited)} ago.`, urgent: waited >= 5 },
+        { text: `Call ${a.provider}${a.contact ? ` (${a.contact})` : ""} to book.${a.referredBy || a.kind === "referral" ? ` The referral was sent ${ago(waited)}.` : ""}`, urgent: waited >= 5 },
         { text: "Have your insurance card and the referral details ready when you call.", urgent: false },
       ];
     case "scheduled": {
@@ -23,7 +23,7 @@ export function nextActions(a: Appointment): NextAction[] {
     }
     case "waiting-office":
       return waited >= 5
-        ? [{ text: `No reply in ${days(waited)}. Consider calling ${a.provider} at ${a.contact} to check on it.`, urgent: true }]
+        ? [{ text: `No reply in ${days(waited)}. Consider calling ${a.provider}${a.contact ? ` at ${a.contact}` : ""} to check on it.`, urgent: true }]
         : [{ text: "Give the office a few business days to reply.", urgent: false }];
     case "results-pending":
       return [
@@ -31,7 +31,7 @@ export function nextActions(a: Appointment): NextAction[] {
         ...(waited >= 7 ? [{ text: `It's been ${days(waited)}. A quick call to check on timing is reasonable.`, urgent: false }] : []),
       ];
     case "follow-up":
-      return [{ text: `Book the follow-up the office asked for. It was requested ${days(waited)} ago.`, urgent: waited >= 7 }];
+      return [{ text: `Book the follow-up the office asked for. It was requested ${ago(waited)}.`, urgent: waited >= 7 }];
     case "completed":
       return [];
   }
@@ -62,6 +62,22 @@ export function officeDraft(a: Appointment) {
   return `Hello,\n\n${ask[a.status]}\n\nThank you,\n[Your name]`;
 }
 
+function ago(n: number) {
+  return n <= 0 ? "today" : n === 1 ? "yesterday" : `${days(n)} ago`;
+}
+
 function days(n: number) {
   return `${n} day${n === 1 ? "" : "s"}`;
+}
+
+export type AppointmentDraft = { title: string; provider: string; status: Status; date: string; time: string };
+export type DraftErrors = Partial<Record<"title" | "provider" | "date", string>>;
+
+/** What must be filled in before an appointment can be saved. */
+export function validateAppointment(d: AppointmentDraft): DraftErrors {
+  const e: DraftErrors = {};
+  if (!d.title.trim()) e.title = "Give it a short name, like “Dental cleaning”.";
+  if (!d.provider.trim()) e.provider = "Add the office or provider.";
+  if (d.status === "scheduled" && !d.date) e.date = "Scheduled appointments need a date. Add one, or pick another status.";
+  return e;
 }

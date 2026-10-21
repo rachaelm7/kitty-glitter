@@ -21,3 +21,9 @@ Status: `idea` · `ready` · `in progress` · `done`
 | 12 | Email Rescue Mode | 1b | in review | Important-email protection |
 | 13 | Travel & Home dashboards + Life Threads | 1b | in review | |
 | 14 | UI/UX polish: widgets, states, motion | 1b | in review | Reduced motion, contrast |
+| 15 | Global search and quick switcher | 1c | in review | PR #11 |
+| 16 | Create and edit appointments, trips and bookings | 1c | in review | `claude/next-three-c`; dates move with the calendar (decision 0004) |
+| 17 | Brain Dump understands repeats and "waiting on" | 1c | in review | `claude/next-three-c`; still reviewed before adding |
+| 18 | Search filters (`#kind`, chips) and actions (`>`) | 1c | in review | `claude/next-three-c` |
+| 19 | Desktop search preview pane | 1c | idea | |
+| 20 | Life Thread notes: edit and delete | 1c | idea | |

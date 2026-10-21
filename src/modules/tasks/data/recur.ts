@@ -1,3 +1,4 @@
+import { toISODate } from "@/core/date";
 import type { Task } from "./types";
 
 /** Repeat choices offered in the editor. A task may also carry a custom number of days. */
@@ -14,9 +15,7 @@ export function repeatLabel(days: number) {
   return REPEAT_OPTIONS.find((o) => o.days === days)?.label ?? `Every ${days} days`;
 }
 
-export function toISODate(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+export { toISODate };
 
 /** The ISO date `days` after `from`, in local time. */
 export function addDaysISO(from: Date, days: number) {

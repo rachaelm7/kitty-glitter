@@ -33,6 +33,17 @@ export function addDays(d: Date, days: number) {
   return c;
 }
 
+/** Local calendar date as YYYY-MM-DD (what <input type="date"> uses). */
+export function toISODate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Days from today to a YYYY-MM-DD date: 0 today, 1 tomorrow, -1 yesterday. */
+export function offsetOfISO(iso: string, now: Date) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86_400_000);
+}
+
 export function formatDay(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }

@@ -45,7 +45,7 @@ export function buildThreadView(thread: LifeThread, src: ThreadSources) {
     ...emails.map((m) => ({ id: `em-${m.id}`, dayOffset: m.receivedDayOffset, label: `Email from ${m.from}: “${m.subject}”`, kind: "email" as const, emailId: m.id })),
     ...appointments.flatMap((a) => [
       ...a.events.map((e) => ({ id: `ap-${a.id}-${e.id}`, dayOffset: e.dayOffset, label: `${a.title}: ${e.label}`, kind: "appointment" as const })),
-      ...(a.when ? [{ id: `ap-${a.id}-when`, dayOffset: a.when.dayOffset, label: `${a.title} at ${a.when.time}`, kind: "appointment" as const }] : []),
+      ...(a.when ? [{ id: `ap-${a.id}-when`, dayOffset: a.when.dayOffset, label: a.when.time ? `${a.title} at ${a.when.time}` : a.title, kind: "appointment" as const }] : []),
     ]),
     ...trips.flatMap((t) => t.reservations.map((r) => ({ id: `tr-${t.id}-${r.id}`, dayOffset: t.startOffset + r.dayIndex, label: r.title, kind: "booking" as const }))),
     ...dates.map((r) => ({ id: `rn-${r.id}`, dayOffset: r.dayOffset, label: r.title, kind: "update" as const })),

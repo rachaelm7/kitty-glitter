@@ -1,12 +1,14 @@
 "use client";
 
-import { createStore } from "@/core/store/createStore";
+import { createStore, shiftChanged } from "@/core/store/createStore";
 import { SEED_TASKS } from "./mock";
 import { completeInList, openLinked, reopenInList } from "./recur";
 import type { Task, TaskCategory } from "./types";
 
 // v3: tasks gained repeats and links to Home upkeep.
-export const taskStore = createStore<Task[]>("tasks", SEED_TASKS, 3);
+export const taskStore = createStore<Task[]>("tasks", SEED_TASKS, 3, {
+  shift: shiftChanged(SEED_TASKS, (t, d) => (t.dueDayOffset === undefined ? t : { ...t, dueDayOffset: t.dueDayOffset + d })),
+});
 
 let counter = 0;
 export function newTaskId() {

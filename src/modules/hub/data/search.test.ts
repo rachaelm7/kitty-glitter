@@ -5,7 +5,7 @@ import { SEED_MAINTENANCE } from "@/modules/home/data/mock";
 import { SEED_TASKS } from "@/modules/tasks/data/mock";
 import { SEED_THREADS } from "@/modules/threads/data/mock";
 import { SEED_TRIPS } from "@/modules/travel/data/mock";
-import { MAX_QUERY_WORDS, buildIndex, defaultResults, normalize, queryTokens, rank, type SearchSources } from "./search";
+import { MAX_QUERY_WORDS, browse, buildIndex, defaultResults, normalize, parseQuery, queryTokens, rank, type SearchSources } from "./search";
 
 const src: SearchSources = { messages: MESSAGES, archived: {}, read: {}, tasks: SEED_TASKS, threads: SEED_THREADS, appointments: SEED_APPOINTMENTS, trips: SEED_TRIPS, upkeep: SEED_MAINTENANCE };
 const index = buildIndex(src);
@@ -32,7 +32,7 @@ describe("normalize", () => {
 describe("indexing", () => {
   it("covers every source and has unique ids", () => {
     const kinds = new Set(index.map((i) => i.kind));
-    for (const k of ["page", "email", "task", "thread", "appointment", "trip", "upkeep"]) expect(kinds.has(k as never)).toBe(true);
+    for (const k of ["page", "action", "email", "task", "thread", "appointment", "trip", "upkeep"]) expect(kinds.has(k as never)).toBe(true);
     expect(new Set(index.map((i) => i.id)).size).toBe(index.length);
   });
 });
@@ -89,5 +89,36 @@ describe("with nothing typed", () => {
     expect(r.filter((x) => x === "page:inbox")).toHaveLength(1);
     expect(r).toContain("page:today");
     expect(r).not.toContain("gone:1");
+  });
+});
+
+describe("filters and actions", () => {
+  it("reads '>' and '#kind' shorthands, and leaves other text alone", () => {
+    expect(parseQuery("> new")).toEqual({ text: "new", kind: "action" });
+    expect(parseQuery(">")).toEqual({ text: "", kind: "action" });
+    expect(parseQuery("#task dentist")).toEqual({ text: "dentist", kind: "task" });
+    expect(parseQuery("#Emails")).toEqual({ text: "", kind: "email" });
+    expect(parseQuery("#nonsense lisbon")).toEqual({ text: "#nonsense lisbon" });
+    expect(parseQuery("  dental  ")).toEqual({ text: "dental" });
+  });
+  it("limits results to one kind", () => {
+    const tasks = rank(index, "dental", 30, "task");
+    expect(tasks.length).toBeGreaterThan(0);
+    expect(tasks.every((r) => r.kind === "task")).toBe(true);
+    expect(rank(index, "dental").some((r) => r.kind !== "task")).toBe(true);
+  });
+  it("finds actions by what they do", () => {
+    expect(rank(index, "new trip", 3)[0].id).toBe("action:new-trip");
+    expect(rank(index, "dark", 30, "action")[0].id).toBe("action:theme-dark");
+  });
+  it("lists a kind with nothing typed, most relevant first", () => {
+    const appts = browse(index, "appointment");
+    expect(appts).toHaveLength(SEED_APPOINTMENTS.length);
+    expect(appts.at(-1)?.id).toBe("appointment:ap6"); // completed sinks to the bottom
+    expect(browse(index, "action")[0].id).toBe("action:new-task");
+  });
+  it("opens appointments and trips directly, not just their page", () => {
+    expect(index.find((i) => i.id === "appointment:ap2")?.target).toEqual({ type: "appointment", id: "ap2" });
+    expect(index.find((i) => i.id === "trip:lisbon")?.target).toEqual({ type: "trip", id: "lisbon" });
   });
 });
