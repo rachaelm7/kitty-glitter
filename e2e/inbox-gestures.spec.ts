@@ -56,8 +56,13 @@ test("keyboard: J/K move, U toggles read, E archives, / searches", async ({ page
   await page.goto("/inbox");
   await expect(page.getByText(/Keyboard:/)).toBeVisible();
 
-  await page.keyboard.press("j");
   const first = page.locator("li[aria-current='true']");
+  // The listener attaches in an effect; on a slow machine the first key can land
+  // before it. Press only until a row is selected, so a late key can't double-move.
+  await expect(async () => {
+    if ((await first.count()) === 0) await page.keyboard.press("j");
+    await expect(first).toHaveCount(1, { timeout: 500 });
+  }).toPass({ timeout: 10_000 });
   await expect(first).toHaveAttribute("data-message-id", "m2");
   await page.keyboard.press("j");
   await expect(first).toHaveAttribute("data-message-id", "m1");

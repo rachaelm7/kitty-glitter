@@ -3,6 +3,40 @@
 Living log of what Claude Code has built, how it was checked, and what is still open.
 Newest increment first. Updated in every PR.
 
+## Latest session: global search, built with four roles (branch `claude/global-search`)
+
+Built as a four-role workflow. The Reviewer was a **separate agent** with a fresh context that never saw the Engineer's reasoning; the other three roles were played by the main session.
+
+| Role | What it produced |
+|---|---|
+| **Architect** | `docs/decisions/0003-global-search.md`: a pure index and ranking in the hub module, a lazy-loaded dialog, ids-only recents, an explicit performance budget and privacy rules. |
+| **Engineer** | The quick switcher (⌘K / Ctrl+K, or the search button on phones and in the sidebar) over emails, tasks, Life Threads, appointments, trips, upkeep and pages. Each result jumps to its source. |
+| **Reviewer** | An independent review of the diff, with **no blockers** and a list of real findings (below). |
+| **Optimizer** | Measured the result, found and fixed one real problem, and confirmed the budget. |
+
+### Review feedback and what happened to it
+- **Fixed:** the demo banner wrapped to two lines on 320px phones (I measured it first: confirmed). It now stays on one line, with a test.
+- **Fixed:** text matching ignored non-Latin scripts and some letters (ø, ł, ß). It's now Unicode-aware.
+- **Fixed:** highlighting could miss part of a match, and a pasted wall of text could make it slow. Words are now de-duplicated, longest first and capped at 8.
+- **Fixed:** accessibility details. The combobox claimed to be expanded and controlling a list that wasn't there when nothing matched. The close button was under 44px. Pressing Enter while composing text with an input-method editor opened a result.
+- **Fixed:** a new query now always starts at the top, and the idle preload is cancelled on unmount.
+- **Added tests** the Reviewer found missing: opening a result while already on that page, arrow wrap-around, Enter with no results, a fresh start on each open, backdrop click and focus return, and that typed text is never stored.
+- **Noted, not changed:** unit tests import sample data directly (as the existing hub tests do), and opening an email from search marks it read. Both are documented in the decision record.
+
+### Optimizer measurements
+- **Bundle:** the search dialog is a 10 KB (4 KB gzipped) chunk that isn't in the first page load.
+- **Found and fixed:** opening search still downloaded a file, because the idle preload and the lazy loader used two separate imports. That meant two copies of the code and a wasted preload. They now share one import: one copy, **zero downloads when you open search**.
+- **Speed:** ranking takes about 0.01 ms per keystroke on the demo data and under 1 ms on a stress test of 5,000 items, so nothing needed optimising there. A keystroke reaches the next painted frame in about 15 ms.
+- **Idle cost:** the dialog's data subscriptions only exist while it's open.
+
+### What was tested
+- Lint, typecheck and build: pass. Unit tests: **94 passing** (15 new for search). End-to-end: **146 passing, 4 skipped by design**, including 19 search tests at both sizes and axe WCAG 2.1 A/AA on the open dialog in light and dark.
+
+### Next three highest-value improvements
+1. **Create and edit appointments and trips** (add a referral, move a booking, mark results received), linked to Life Threads and Tasks.
+2. **Smarter Brain Dump:** understand repeats ("every month") and waiting ("waiting on Dana to reply") so captured thoughts become repeating or Waiting-on tasks, still reviewed first.
+3. **Search filters and actions:** type `>` for actions ("mark all read", "new task"), `#` to limit to a kind, and show a preview pane on desktop.
+
 ## Latest session: the next three improvements (branch `claude/next-three`)
 
 ### What improved

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, type ReactNode } from "react";
 import { MODULES } from "@/config/modules";
+import { openSearch } from "@/core/store/search";
 import { Icon } from "./icons";
 import { cx } from "./primitives";
 
@@ -43,6 +44,16 @@ export function AppShell({ children, extras }: { children: ReactNode; extras?: R
             <Icon.Plus width={20} height={20} /> Brain dump
           </Link>
         )}
+        <button
+          type="button"
+          onClick={openSearch}
+          aria-label="Search everything"
+          className="mb-4 flex min-h-11 w-full items-center gap-3 rounded-xl border border-line bg-surface px-3 text-[15px] text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+        >
+          <Icon.Search width={18} height={18} />
+          <span className="flex-1 text-left">Search</span>
+          <kbd className="rounded bg-surface-2 px-1.5 text-xs">⌘K</kbd>
+        </button>
         <ul className="space-y-1">
           {TABS.map((t) => (
             <li key={t.href}>
@@ -147,9 +158,19 @@ function DemoBanner() {
       aria-label="Demo mode: fictional data"
       className="sticky top-0 z-30 border-b border-line bg-champagne-soft/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur"
     >
-      <p className="flex min-h-8 items-center justify-center gap-1.5 px-4 text-[11px] font-bold tracking-[0.14em] text-champagne uppercase">
-        <Icon.Sparkle width={12} height={12} aria-hidden /> Demo mode — fictional data
-      </p>
+      <div className="relative flex min-h-8 items-center justify-center lg:min-h-8">
+        <p className="flex items-center justify-center gap-1.5 px-12 text-[10px] font-bold tracking-[0.08em] whitespace-nowrap text-champagne uppercase min-[380px]:text-[11px] min-[380px]:tracking-[0.14em] lg:px-4">
+          <Icon.Sparkle width={12} height={12} aria-hidden /> Demo mode — fictional data
+        </p>
+        <button
+          type="button"
+          onClick={openSearch}
+          aria-label="Search everything"
+          className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 place-items-center rounded-full text-champagne hover:bg-surface/60 lg:hidden"
+        >
+          <Icon.Search width={20} height={20} />
+        </button>
+      </div>
     </div>
   );
 }

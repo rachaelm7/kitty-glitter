@@ -20,6 +20,20 @@ for (const scheme of ["light", "dark"] as const) {
   });
 }
 
+for (const scheme of ["light", "dark"] as const) {
+  test(`the open search dialog has no WCAG A/AA violations (${scheme})`, async ({ page, isMobile }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto("/");
+    if (isMobile) await page.getByRole("button", { name: "Search everything" }).first().click();
+    else await page.keyboard.press("Control+k");
+    await page.getByRole("combobox").fill("dental");
+    await page.getByRole("option").first().waitFor();
+    await page.waitForTimeout(500);
+    const results = await new AxeBuilder({ page }).include("dialog[open]").withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target.join(" ")}`)).toEqual([]);
+  });
+}
+
 test("reduced motion turns animations off", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
